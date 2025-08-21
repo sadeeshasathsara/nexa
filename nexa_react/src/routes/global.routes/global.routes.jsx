@@ -5,10 +5,12 @@ import DonorRoutes from '../donor.routes/donor.routes'
 import InstitutionRoutes from '../institution.routes/institution.routes'
 import TutorRoutes from '../tutor.routes/tutor.routes'
 import StudentRoutes from '../student.routes/student.routes'
+import LandingPage from '../../pages/global.pages/landing.page'
 
 function GlobalRoutes() {
     return (
         <Routes>
+            <Route path='/' element={<LandingPage />}></Route>
             <Route path='admin/*' element={<AdminRoutes />}></Route>
             <Route path='donor/*' element={<DonorRoutes />}></Route>
             <Route path='institution/*' element={<InstitutionRoutes />}></Route>
