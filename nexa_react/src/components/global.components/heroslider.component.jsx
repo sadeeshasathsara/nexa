@@ -36,7 +36,7 @@ export default function HeroSlider() {
             subtext: 'Connect with tutors, manage classes, and track student progress all in one place.',
             ctaText: 'Partner with NEXA',
             ctaColor: 'bg-orange-600 hover:bg-orange-700',
-            bgGradient: 'from-orange-600/80 to-red-700/80',
+            bgGradient: 'from-orange-600/50 to-red-700/50',
             bgImage: 'https://images.unsplash.com/photo-1603573355706-3f15d98cf100?q=80&w=1329&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
         },
         {
@@ -57,12 +57,12 @@ export default function HeroSlider() {
         if (!isAutoPlaying) {
             const interval = setInterval(() => {
                 setCurrentSlide((prev) => (prev + 1) % slides.length);
-            }, 10000);
+            }, 7000);
             return () => clearInterval(interval);
         } else {
             const interval = setInterval(() => {
                 setCurrentSlide((prev) => (prev + 1) % slides.length);
-            }, 5000);
+            }, 4000);
             return () => clearInterval(interval);
         }
     }, [isAutoPlaying, slides.length]);
