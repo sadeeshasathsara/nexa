@@ -23,7 +23,7 @@ import {
     School
 } from 'lucide-react';
 
-import useScrollAnimation from '../../tools/global.tools.js/useScrollAnimation.tool';
+import useScrollAnimation from '../../../tools/global.tools.js/useScrollAnimation.tool';
 
 export default function NexaSections() {
     const visibleElements = useScrollAnimation();

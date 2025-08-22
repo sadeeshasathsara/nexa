@@ -15,12 +15,14 @@ import {
     Contact
 } from 'lucide-react';
 import logo from '../../assets/global.assets/logo3.png';
+import { useNavigate } from 'react-router-dom';
 
 export default function Navbar() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [selectedLanguage, setSelectedLanguage] = useState('EN');
     const [activeLink, setActiveLink] = useState('Home');
     const [isScrolled, setIsScrolled] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const handleScroll = () => {
@@ -39,7 +41,7 @@ export default function Navbar() {
     ];
 
     const navLinks = [
-        { name: 'Home', href: '#home', icon: Home },
+        { name: 'Home', href: '/', icon: Home },
         { name: 'About', href: '#about', icon: BookOpen },
         { name: 'Contact', href: '#contact', icon: Contact },
         { name: 'Donate', href: '#donate', icon: Heart }
@@ -124,7 +126,7 @@ export default function Navbar() {
                             <span>Login</span>
                         </button>
 
-                        <button className="flex items-center space-x-1 px-4 py-2 text-sm font-medium text-white bg-[#0d9aac] hover:bg-[#0b8a9a] rounded-md transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer">
+                        <button onClick={() => navigate('/v1/register')} className="flex items-center space-x-1 px-4 py-2 text-sm font-medium text-white bg-[#0d9aac] hover:bg-[#0b8a9a] rounded-md transition-all duration-200 shadow-md hover:shadow-lg cursor-pointer">
                             <UserPlus className="h-4 w-4" />
                             <span>Sign Up</span>
                         </button>

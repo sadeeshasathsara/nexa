@@ -6,6 +6,7 @@ import InstitutionRoutes from '../institution.routes/institution.routes'
 import TutorRoutes from '../tutor.routes/tutor.routes'
 import StudentRoutes from '../student.routes/student.routes'
 import LandingPage from '../../pages/global.pages/landing.page'
+import RegisterPage from '../../pages/global.pages/register.page'
 
 function GlobalRoutes() {
     return (
@@ -16,6 +17,7 @@ function GlobalRoutes() {
             <Route path='institution/*' element={<InstitutionRoutes />}></Route>
             <Route path='student/*' element={<StudentRoutes />}></Route>
             <Route path='tutor/*' element={<TutorRoutes />}></Route>
+            <Route path='register/*' element={<RegisterPage />}></Route>
         </Routes>
     )
 }
