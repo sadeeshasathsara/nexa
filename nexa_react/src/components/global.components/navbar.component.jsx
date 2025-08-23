@@ -15,7 +15,7 @@ import {
     Contact
 } from 'lucide-react';
 import logo from '../../assets/global.assets/logo3.png';
-import { useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 export default function Navbar() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -23,6 +23,26 @@ export default function Navbar() {
     const [activeLink, setActiveLink] = useState('Home');
     const [isScrolled, setIsScrolled] = useState(false);
     const navigate = useNavigate();
+    const location = useLocation();
+
+    useState(() => {
+        switch (location.pathname) {
+            case "/v1/home":
+                setActiveLink('Home');
+                break;
+            case "/v1/about":
+                setActiveLink('About');
+                break;
+            case "/v1/contact":
+                setActiveLink('Contact');
+                break;
+            case "/v1/donate":
+                setActiveLink('Donate');
+                break;
+            default:
+                setActiveLink('Home');
+        }
+    }, []);
 
     useEffect(() => {
         const handleScroll = () => {
@@ -42,9 +62,9 @@ export default function Navbar() {
 
     const navLinks = [
         { name: 'Home', href: '/', icon: Home },
-        { name: 'About', href: '#about', icon: BookOpen },
-        { name: 'Contact', href: '#contact', icon: Contact },
-        { name: 'Donate', href: '#donate', icon: Heart }
+        { name: 'About', href: '/v1/about', icon: BookOpen },
+        { name: 'Contact', href: '/v1/contact', icon: Contact },
+        { name: 'Donate', href: '/v1/donate', icon: Heart }
     ];
 
     const toggleMobileMenu = () => {
@@ -57,7 +77,7 @@ export default function Navbar() {
             : 'relative'
             }`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="grid grid-cols-3 items-center h-16 w-full">
+                <div className="md:grid md:grid-cols-3 flex justify-between items-center h-16 w-full">
 
                     {/* Left - Logo/Branding */}
                     <div className="flex-shrink-0 flex items-center">
@@ -77,9 +97,8 @@ export default function Navbar() {
                                 const IconComponent = link.icon;
                                 const isActive = activeLink === link.name;
                                 return (
-                                    <a
+                                    <Link to={link.href}
                                         key={link.name}
-                                        href={link.href}
                                         onClick={() => setActiveLink(link.name)}
                                         className={`flex items-center space-x-1 px-4 py-2 rounded-md text-sm font-medium cursor-pointer transition-colors duration-200 ${isActive
                                             ? 'text-[#0d9aac] bg-[#00b6c713]'
@@ -88,7 +107,7 @@ export default function Navbar() {
                                     >
                                         <IconComponent className="h-4 w-4" />
                                         <span>{link.name}</span>
-                                    </a>
+                                    </Link>
                                 );
                             })}
                         </div>
@@ -132,8 +151,8 @@ export default function Navbar() {
                         </button>
                     </div>
 
-                    {/* Mobile Menu Button - positioned in right section on mobile */}
-                    <div className="md:hidden flex justify-end">
+                    {/* Mobile Menu Button - positioned on the right for mobile */}
+                    <div className="md:hidden">
                         <button
                             onClick={toggleMobileMenu}
                             className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-[#0d9aac] hover:bg-[#00b6c713] transition-colors duration-200 cursor-pointer"

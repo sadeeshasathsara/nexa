@@ -162,10 +162,10 @@ const RegistrationOnboarding = () => {
                 return (
                     <div
                         className={`transition-all duration-500 ease-out ${isAnimating
-                                ? "opacity-0 scale-95"
-                                : isLoaded
-                                    ? "opacity-100 scale-100"
-                                    : "opacity-0 scale-90"
+                            ? "opacity-0 scale-95"
+                            : isLoaded
+                                ? "opacity-100 scale-100"
+                                : "opacity-0 scale-90"
                             }`}
                     >
                         {/* Hero Section */}
@@ -232,7 +232,7 @@ const RegistrationOnboarding = () => {
                                         style={{ transitionDelay: `${400 + index * 100}ms` }}
                                     >
                                         <button
-                                            className={`group relative overflow-hidden rounded-xl bg-gradient-to-br ${option.bgGradient} p-5 text-left transition-all duration-500 hover:scale-105 hover:shadow-xl w-full min-h-44 border border-white/50 backdrop-blur-sm flex flex-col`}
+                                            className={`group relative cursor-pointer overflow-hidden rounded-xl bg-gradient-to-br ${option.bgGradient} p-5 text-left transition-all duration-500 hover:scale-105 hover:shadow-xl w-full min-h-44 border border-white/50 backdrop-blur-sm flex flex-col`}
                                             onClick={() => handleRoleSelect(option.key)}
                                         >
                                             {/* Hover background */}
@@ -340,7 +340,7 @@ const RegistrationOnboarding = () => {
                         <div className="mb-8">
                             <button
                                 onClick={handleBack}
-                                className="inline-flex items-center gap-3 px-4 py-2 bg-white/90 backdrop-blur-sm hover:bg-white text-gray-700 hover:text-gray-900 rounded-xl border border-gray-200/50 shadow-sm hover:shadow-md transition-all duration-200 group"
+                                className="inline-flex cursor-pointer items-center gap-3 px-4 py-2 bg-white/90 backdrop-blur-sm hover:bg-white text-gray-700 hover:text-gray-900 rounded-xl border border-gray-200/50 shadow-sm hover:shadow-md transition-all duration-200 group"
                             >
                                 <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-200" />
                                 <span className="font-medium">Back to selection</span>
