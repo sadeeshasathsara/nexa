@@ -23,8 +23,8 @@ import {
     Award,
     PieChart
 } from 'lucide-react';
-import Footer from '../../components/global.components/footer.component';
-import Navbar from '../../components/global.components/navbar.component';
+import Footer from '../../../components/global.components/footer.component';
+import Navbar from '../../../components/global.components/navbar.component';
 
 const NEXADonationPage = () => {
     const [visibleSections, setVisibleSections] = useState(new Set());

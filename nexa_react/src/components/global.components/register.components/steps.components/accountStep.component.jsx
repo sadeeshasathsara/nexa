@@ -43,10 +43,31 @@
 import React, { useState, useEffect } from "react";
 import { User, Mail, FileText, GraduationCap, BookOpen, Eye, EyeOff, Check, X, AlertCircle } from "lucide-react";
 import InputField from "../tools.compoenents/inputField.component";
+import ReCAPTCHA from "react-google-recaptcha"
+import { otpApi } from "../../../../apis/global.apis/otp.api";
+import { useNotify } from "../../notification.components/notificationProvider.component";
 
 const AccountStep = ({ formData, setFormData, errors, setErrors, touched, setTouched, onNext }) => {
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [captchaToken, setCaptchaToken] = useState(null);
+    const [captchaError, setCaptchaError] = useState(false);
+    const [loading, setLoading] = useState(false);
+
+    const notify = useNotify();
+
+    const handleCaptcha = (token) => {
+        setCaptchaToken(token);
+    };
+
+    const handleSubmit = () => {
+        if (!captchaToken) {
+            alert("Please complete the captcha first!");
+            return;
+        }
+        // send captchaToken to backend with OTP request
+        onNext();
+    };
 
     const validateField = (name, value) => {
         const newErrors = { ...errors };
@@ -128,7 +149,9 @@ const AccountStep = ({ formData, setFormData, errors, setErrors, touched, setTou
         validateField(name, value);
     };
 
-    const validateAndNext = () => {
+    const validateAndNext = async () => {
+        setLoading(true);
+
         const allTouched = {
             firstName: true,
             lastName: true,
@@ -148,9 +171,30 @@ const AccountStep = ({ formData, setFormData, errors, setErrors, touched, setTou
         const hasEmptyFields = !formData.firstName || !formData.lastName || !formData.email ||
             !formData.password || !formData.confirmPassword;
 
-        if (!hasErrors && !hasEmptyFields) {
-            onNext();
+        if (hasErrors || hasEmptyFields) return;
+
+        if (!captchaToken) {
+            setCaptchaError(true)
+            return;
         }
+
+        try {
+            const res = await otpApi({
+                captchaToken: captchaToken,
+                email: formData.email
+            })
+
+            if (!res || !res.success) {
+                notify(res?.message || 'reCAPTCHA failed.', 'error')
+                return;
+            }
+        } catch (e) {
+            return;
+        } finally {
+            setLoading(false);
+        }
+
+        onNext();
     };
 
     return (
@@ -222,11 +266,32 @@ const AccountStep = ({ formData, setFormData, errors, setErrors, touched, setTou
                 />
             </div>
 
+            <div className="recaptcha-wrapper w-full flex flex-col items-center justify-center">
+                <ReCAPTCHA
+                    sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
+                    onChange={handleCaptcha}
+                />
+
+                {captchaError && (
+                    <span className="text-red-500 text-[10px]"> Please complete the reCAPTCHA</span>
+                )}
+
+            </div>
+
             <button
                 onClick={validateAndNext}
-                className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold py-4 rounded-xl hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-4 focus:ring-indigo-500/30 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg"
+                disabled={loading}
+                className={`w-full flex items-center justify-center gap-2 cursor-pointer bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold py-4 rounded-xl hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-4 focus:ring-indigo-500/30 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98] shadow-lg
+        ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
-                Continue
+                {loading ? (
+                    <>
+                        <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                        Sending OTP...
+                    </>
+                ) : (
+                    "Continue"
+                )}
             </button>
         </div>
     );

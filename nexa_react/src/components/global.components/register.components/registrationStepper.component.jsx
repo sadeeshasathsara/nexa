@@ -64,7 +64,7 @@ import TipsCard from "./tips.component";
 
 const RegistrationStepper = ({ config }) => {
     const [currentStep, setCurrentStep] = useState(0);
-    const [formData, setFormData] = useState({});
+    const [formData, setFormData] = useState(config.payload);
     const [errors, setErrors] = useState({});
     const [touched, setTouched] = useState({});
 
@@ -129,8 +129,8 @@ const RegistrationStepper = ({ config }) => {
                                                 <div key={index} className="flex flex-col items-center">
                                                     <div
                                                         className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${index <= currentStep
-                                                                ? "bg-white text-indigo-600 shadow-lg"
-                                                                : "bg-white/20 text-white/60"
+                                                            ? "bg-white text-indigo-600 shadow-lg"
+                                                            : "bg-white/20 text-white/60"
                                                             }`}
                                                     >
                                                         {index < currentStep ? (

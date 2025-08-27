@@ -140,7 +140,7 @@ export default function Navbar() {
                         </div>
 
                         {/* Auth Buttons */}
-                        <button className="flex items-center space-x-1 px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-md hover:bg-[#00b6c713] hover:text-[#0d9aac] hover:border-[#0d9aac] transition-colors duration-200 cursor-pointer">
+                        <button onClick={() => navigate('/v1/login')} className="flex items-center space-x-1 px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-md hover:bg-[#00b6c713] hover:text-[#0d9aac] hover:border-[#0d9aac] transition-colors duration-200 cursor-pointer">
                             <LogIn className="h-4 w-4" />
                             <span>Login</span>
                         </button>

@@ -15,8 +15,8 @@ import {
     Globe,
     Headphones
 } from 'lucide-react';
-import Navbar from '../../components/global.components/navbar.component';
-import Footer from '../../components/global.components/footer.component';
+import Navbar from '../../../components/global.components/navbar.component';
+import Footer from '../../../components/global.components/footer.component';
 
 const ContactUs = () => {
     const [visibleSections, setVisibleSections] = useState(new Set());

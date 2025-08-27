@@ -63,6 +63,15 @@ export const registrationConfigs = {
             { component: OtpStep, icon: Mail, title: "Verify", slogan: "Verify your email address" },
             { component: TncStep, icon: FileText, title: "Terms", slogan: "Accept our terms to continue" },
         ],
+        payload: {
+            role: 'student',
+            firstName: null,
+            lastName: null,
+            email: null,
+            password: null,
+            otpVerified: false,
+            tncAccepted: false
+        },
         tips: {
             0: [ // Account Step Tips
                 {
