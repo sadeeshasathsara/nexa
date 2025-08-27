@@ -21,17 +21,17 @@ import mongoose from "mongoose";
  *   MONGO_URI=mongodb://127.0.0.1:27017/mydatabase
  */
 const connectDB = async () => {
-    try {
-        // Attempt to connect to MongoDB using the connection string in .env
-        const conn = await mongoose.connect(process.env.MONGO_URI);
+  try {
+    // Attempt to connect to MongoDB using the connection string in .env
+    const conn = await mongoose.connect(process.env.MONGO_URI);
 
-        // Log success message if connected
-        console.log(`> MongoDB Connected`);
-    } catch (error) {
-        // Log error message and exit process if connection fails
-        console.error(`Error: ${error.message}`);
-        process.exit(1); // Exit with failure
-    }
+    // Log success message if connected
+    console.log(`> MongoDB Connected`);
+  } catch (error) {
+    // Log error message and exit process if connection fails
+    console.error(`Error: ${error.message}`);
+    process.exit(1); // Exit with failure
+  }
 };
 
 export default connectDB;
