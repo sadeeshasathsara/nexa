@@ -31,7 +31,7 @@
 
 import React, { useState, useEffect } from "react";
 import { User, Mail, FileText, GraduationCap, BookOpen, Eye, EyeOff, Check, X, AlertCircle } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useNotify } from "../../notification.components/notificationProvider.component";
 import { registerApi } from "../../../../apis/global.apis/register.api";
 
@@ -39,6 +39,7 @@ const TncStep = ({ formData, setFormData, onPrev }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const notify = useNotify();
+    const navigate = useNavigate();
 
     const handleSubmit = async () => {
         setIsSubmitting(true);
@@ -48,6 +49,7 @@ const TncStep = ({ formData, setFormData, onPrev }) => {
                 notify(res.message, 'error');
             } else {
                 notify(res.message, 'success');
+                navigate('/v1/login');
             }
 
         } catch (e) {

@@ -63,7 +63,7 @@ export default function Footer() {
     const contactInfo = [
         { icon: Mail, text: 'nexa.nexgen@gmail.com', href: 'mailto:nexa.nexgen@gmail.com' },
         { icon: Phone, text: '+1 (555) 123-4567', href: 'tel:+15551234567' },
-        { icon: MapPin, text: '123 Education Street, Learning City, LC 12345', href: '#location' }
+        { icon: MapPin, text: 'Colombo, Sri Lanka', href: '#location' }
     ];
 
     return (

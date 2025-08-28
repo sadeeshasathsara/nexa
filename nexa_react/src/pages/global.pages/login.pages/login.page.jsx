@@ -1,283 +1,197 @@
-import React, { useState } from 'react';
-import {
-    Mail,
-    Lock,
-    Eye,
-    EyeOff,
-    ArrowRight,
-    Shield,
-    CheckCircle,
-    User,
-    Chrome,
-    Github,
-    AlertCircle
-} from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Shield, CheckCircle, Sparkles, Waves } from 'lucide-react';
+import LoginCard from '../../../components/global.components/login.components/login.component';
+import LoginTipsCard from '../../../components/global.components/login.components/tips.component';
+import Navbar from '../../../components/global.components/navbar.component';
+import Footer from '../../../components/global.components/footer.component';
+import { useNavigate } from 'react-router-dom';
 
 const LoginPage = () => {
-    const [formData, setFormData] = useState({
-        email: '',
-        password: ''
-    });
-    const [showPassword, setShowPassword] = useState(false);
-    const [rememberMe, setRememberMe] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
-    const [errors, setErrors] = useState({});
+    const [isPageLoaded, setIsPageLoaded] = useState(false);
+    const navigate = useNavigate();
 
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
-        // Clear error when user starts typing
-        if (errors[name]) {
-            setErrors(prev => ({
-                ...prev,
-                [name]: ''
-            }));
-        }
-    };
-
-    const validateForm = () => {
-        const newErrors = {};
-
-        if (!formData.email) {
-            newErrors.email = 'Email is required';
-        } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-            newErrors.email = 'Please enter a valid email address';
-        }
-
-        if (!formData.password) {
-            newErrors.password = 'Password is required';
-        } else if (formData.password.length < 6) {
-            newErrors.password = 'Password must be at least 6 characters';
-        }
-
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        if (!validateForm()) return;
-
-        setIsLoading(true);
-
-        // Simulate API call
-        try {
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            console.log('Login attempt:', { ...formData, rememberMe });
-            // Handle successful login here
-        } catch (error) {
-            console.error('Login failed:', error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const handleSocialLogin = (provider) => {
-        console.log(`Login with ${provider}`);
-        // Handle social login
-    };
-
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setIsPageLoaded(true);
+        }, 100);
+        return () => clearTimeout(timer);
+    }, []);
     return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center p-4">
-            {/* Background Pattern */}
-            <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23e2e8f0\' fill-opacity=\'0.4\'%3E%3Ccircle cx=\'7\' cy=\'7\' r=\'1\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-40"></div>
+        <>
+            <Navbar />
+            <div
+                className={`min-h-screen relative overflow-hidden flex items-center justify-center p-4 transition-all duration-1000 ease-out ${isPageLoaded ? 'opacity-100' : 'opacity-0'
+                    }`}
+                style={{
+                    background: `
+                    radial-gradient(ellipse at top left, #00FF99 0%, transparent 50%),
+                    radial-gradient(ellipse at top right, #00B6C7 0%, transparent 50%),
+                    radial-gradient(ellipse at bottom left, #0D9AAC 0%, transparent 50%),
+                    radial-gradient(ellipse at bottom right, #009966 0%, transparent 50%),
+                    linear-gradient(135deg, #043345 0%, #0D9AAC 100%)
+                `
+                }}
+            >
+                {/* Animated Background Elements */}
+                <div className={`absolute inset-0 opacity-30 transition-all duration-1500 ease-out ${isPageLoaded ? 'opacity-30 scale-100' : 'opacity-0 scale-110'
+                    }`}>
+                    {/* Floating Circles */}
+                    <div
+                        className="absolute w-72 h-72 rounded-full blur-3xl animate-pulse"
+                        style={{
+                            background: 'radial-gradient(circle, #00FF99 0%, transparent 70%)',
+                            top: '10%',
+                            left: '10%',
+                            animationDuration: '4s',
+                            transitionDelay: '200ms'
+                        }}
+                    ></div>
+                    <div
+                        className="absolute w-96 h-96 rounded-full blur-3xl animate-pulse"
+                        style={{
+                            background: 'radial-gradient(circle, #00B6C7 0%, transparent 70%)',
+                            top: '50%',
+                            right: '10%',
+                            animationDuration: '6s',
+                            animationDelay: '2s',
+                            transitionDelay: '400ms'
+                        }}
+                    ></div>
+                    <div
+                        className="absolute w-64 h-64 rounded-full blur-3xl animate-pulse"
+                        style={{
+                            background: 'radial-gradient(circle, #009966 0%, transparent 70%)',
+                            bottom: '20%',
+                            left: '20%',
+                            animationDuration: '5s',
+                            animationDelay: '1s',
+                            transitionDelay: '600ms'
+                        }}
+                    ></div>
+                </div>
 
-            <div className="relative w-full max-w-md">
-                {/* Main Login Card */}
-                <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
-                    {/* Header */}
-                    <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-8 text-center">
-                        <div className="w-16 h-16 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-4">
-                            <User className="w-8 h-8 text-white" />
+                {/* Grid Pattern Overlay */}
+                <div
+                    className={`absolute inset-0 opacity-20 transition-all duration-1000 ease-out ${isPageLoaded ? 'opacity-20' : 'opacity-0'
+                        }`}
+                    style={{
+                        backgroundImage: `
+                        linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
+                    `,
+                        backgroundSize: '50px 50px',
+                        transitionDelay: '800ms'
+                    }}
+                ></div>
+
+                {/* Floating Particles */}
+                <div className={`absolute inset-0 overflow-hidden pointer-events-none transition-all duration-1200 ease-out ${isPageLoaded ? 'opacity-100' : 'opacity-0'
+                    }`} style={{ transitionDelay: '1000ms' }}>
+                    {[...Array(20)].map((_, i) => (
+                        <div
+                            key={i}
+                            className="absolute w-2 h-2 rounded-full opacity-40 animate-bounce"
+                            style={{
+                                backgroundColor: ['#00FF99', '#00B6C7', '#0D9AAC', '#009966'][i % 4],
+                                left: `${Math.random() * 100}%`,
+                                top: `${Math.random() * 100}%`,
+                                animationDelay: `${Math.random() * 5}s`,
+                                animationDuration: `${3 + Math.random() * 4}s`
+                            }}
+                        ></div>
+                    ))}
+                </div>
+
+                {/* Main Content Container */}
+                <div className={`relative z-10 w-full max-w-6xl mx-auto transition-all duration-1000 ease-out ${isPageLoaded ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform translate-y-8'
+                    }`} style={{ transitionDelay: '600ms' }}>
+                    {/* Cards Container */}
+                    <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-stretch">
+                        {/* Login Card */}
+                        <div
+                            className="w-full lg:w-1/2 flex flex-col"
+                            style={{ height: '80vh', maxHeight: '800px' }}
+                        >
+                            <LoginCard />
                         </div>
-                        <h1 className="text-2xl font-bold text-white mb-2">Welcome Back</h1>
-                        <p className="text-blue-100">Sign in to your account</p>
+
+                        {/* Tips Card */}
+                        <div
+                            className="w-full lg:w-1/2 flex flex-col"
+                            style={{ height: '80vh', maxHeight: '800px' }}
+                        >
+                            <LoginTipsCard />
+                        </div>
                     </div>
 
-                    {/* Form Content */}
-                    <div className="p-8">
-                        <div className="space-y-6">
-                            {/* Email Field */}
-                            <div>
-                                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-                                    Email Address
-                                </label>
-                                <div className="relative">
-                                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                                    <input
-                                        type="email"
-                                        id="email"
-                                        name="email"
-                                        value={formData.email}
-                                        onChange={handleInputChange}
-                                        className={`w-full pl-12 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${errors.email ? 'border-red-300 bg-red-50' : 'border-gray-300'
-                                            }`}
-                                        placeholder="Enter your email"
-                                        disabled={isLoading}
-                                    />
-                                    {errors.email && (
-                                        <AlertCircle className="absolute right-3 top-1/2 transform -translate-y-1/2 text-red-400 w-5 h-5" />
-                                    )}
-                                </div>
-                                {errors.email && (
-                                    <p className="mt-1 text-sm text-red-600 flex items-center">
-                                        <AlertCircle className="w-4 h-4 mr-1" />
-                                        {errors.email}
-                                    </p>
-                                )}
+                    {/* Security Features - Below Cards */}
+                    <div className={`mt-6 bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 transition-all duration-800 ease-out ${isPageLoaded ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform translate-y-4'
+                        }`} style={{ transitionDelay: '1200ms' }}>
+                        <div className="flex items-center justify-center space-x-8 text-xs text-white/90">
+                            <div className={`flex items-center transition-all duration-500 ease-out ${isPageLoaded ? 'opacity-100 transform translate-x-0' : 'opacity-0 transform -translate-x-4'
+                                }`} style={{ transitionDelay: '1400ms' }}>
+                                <Shield
+                                    className="w-4 h-4 mr-1.5"
+                                    style={{ color: '#00FF99' }}
+                                />
+                                <span>256-bit SSL</span>
                             </div>
-
-                            {/* Password Field */}
-                            <div>
-                                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                                    Password
-                                </label>
-                                <div className="relative">
-                                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                                    <input
-                                        type={showPassword ? "text" : "password"}
-                                        id="password"
-                                        name="password"
-                                        value={formData.password}
-                                        onChange={handleInputChange}
-                                        className={`w-full pl-12 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 ${errors.password ? 'border-red-300 bg-red-50' : 'border-gray-300'
-                                            }`}
-                                        placeholder="Enter your password"
-                                        disabled={isLoading}
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors duration-200"
-                                        disabled={isLoading}
-                                    >
-                                        {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                                    </button>
-                                </div>
-                                {errors.password && (
-                                    <p className="mt-1 text-sm text-red-600 flex items-center">
-                                        <AlertCircle className="w-4 h-4 mr-1" />
-                                        {errors.password}
-                                    </p>
-                                )}
+                            <div className={`flex items-center transition-all duration-500 ease-out ${isPageLoaded ? 'opacity-100 transform translate-x-0' : 'opacity-0 transform -translate-x-4'
+                                }`} style={{ transitionDelay: '1500ms' }}>
+                                <CheckCircle
+                                    className="w-4 h-4 mr-1.5"
+                                    style={{ color: '#00FF99' }}
+                                />
+                                <span>GDPR Compliant</span>
                             </div>
-
-                            {/* Remember Me & Forgot Password */}
-                            <div className="flex items-center justify-between">
-                                <label className="flex items-center cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        checked={rememberMe}
-                                        onChange={(e) => setRememberMe(e.target.checked)}
-                                        className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
-                                        disabled={isLoading}
-                                    />
-                                    <span className="ml-2 text-sm text-gray-600">Remember me</span>
-                                </label>
-                                <button
-                                    type="button"
-                                    className="text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors duration-200 cursor-pointer"
-                                    disabled={isLoading}
-                                >
-                                    Forgot password?
-                                </button>
+                            <div className={`flex items-center transition-all duration-500 ease-out ${isPageLoaded ? 'opacity-100 transform translate-x-0' : 'opacity-0 transform -translate-x-4'
+                                }`} style={{ transitionDelay: '1600ms' }}>
+                                <Waves
+                                    className="w-4 h-4 mr-1.5"
+                                    style={{ color: '#00FF99' }}
+                                />
+                                <span>2FA Ready</span>
                             </div>
+                        </div>
+                    </div>
 
-                            {/* Login Button */}
+                    {/* Footer */}
+                    <div className={`mt-6 text-center transition-all duration-600 ease-out ${isPageLoaded ? 'opacity-100 transform translate-y-0' : 'opacity-0 transform translate-y-2'
+                        }`} style={{ transitionDelay: '1700ms' }}>
+                        <p className="text-xs text-white/60 leading-relaxed">
+                            By continuing, you agree to our{' '}
                             <button
-                                type="button"
-                                onClick={handleSubmit}
-                                disabled={isLoading}
-                                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-4 rounded-lg font-semibold hover:from-blue-700 hover:to-indigo-700 focus:ring-4 focus:ring-blue-200 transition-all duration-200 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 disabled:hover:scale-100 cursor-pointer"
-                            >
-                                {isLoading ? (
-                                    <div className="flex items-center">
-                                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                                        Signing In...
-                                    </div>
-                                ) : (
-                                    <div className="flex items-center">
-                                        Sign In
-                                        <ArrowRight className="ml-2 w-5 h-5" />
-                                    </div>
-                                )}
+                                onClick={() => window.open('/v1/tnc', '_blank')}
+                                className="underline cursor-pointer hover:text-white/80 transition-colors">
+                                Terms of Service
                             </button>
-                        </div>
-
-                        {/* Divider */}
-                        <div className="my-6">
-                            <div className="relative">
-                                <div className="absolute inset-0 flex items-center">
-                                    <div className="w-full border-t border-gray-300"></div>
-                                </div>
-                                <div className="relative flex justify-center text-sm">
-                                    <span className="px-2 bg-white text-gray-500">Or continue with</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Social Login Buttons */}
-                        <div className="grid grid-cols-2 gap-3">
+                            {' '}and{' '}
                             <button
-                                type="button"
-                                onClick={() => handleSocialLogin('Google')}
-                                disabled={isLoading}
-                                className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                <Chrome className="w-5 h-5 text-gray-600 mr-2" />
-                                <span className="text-sm font-medium text-gray-700">Google</span>
+                                onClick={() => window.open('/v1/privacy', '_blank')}
+                                className="underline cursor-pointer hover:text-white/80 transition-colors">
+                                Privacy Policy
                             </button>
-                            <button
-                                type="button"
-                                onClick={() => handleSocialLogin('GitHub')}
-                                disabled={isLoading}
-                                className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                <Github className="w-5 h-5 text-gray-600 mr-2" />
-                                <span className="text-sm font-medium text-gray-700">GitHub</span>
-                            </button>
-                        </div>
-
-                        {/* Sign Up Link */}
-                        <div className="mt-6 text-center">
-                            <p className="text-sm text-gray-600">
-                                Don't have an account?{' '}
-                                <button
-                                    type="button"
-                                    className="font-medium text-blue-600 hover:text-blue-800 transition-colors duration-200"
-                                    disabled={isLoading}
-                                >
-                                    Sign up here
-                                </button>
-                            </p>
-                        </div>
+                        </p>
                     </div>
                 </div>
 
-                {/* Security Features */}
-                <div className="mt-6 bg-white/80 backdrop-blur-sm rounded-lg p-4 border border-gray-200">
-                    <div className="flex items-center justify-center space-x-6 text-xs text-gray-600">
-                        <div className="flex items-center">
-                            <Shield className="w-4 h-4 text-green-500 mr-1" />
-                            <span>SSL Secured</span>
-                        </div>
-                        <div className="flex items-center">
-                            <CheckCircle className="w-4 h-4 text-green-500 mr-1" />
-                            <span>Privacy Protected</span>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Footer */}
-                <div className="mt-4 text-center text-xs text-gray-500">
-                    <p>By signing in, you agree to our Terms of Service and Privacy Policy</p>
+                {/* Decorative Elements */}
+                <div className={`absolute bottom-0 left-0 right-0 h-32 opacity-30 transition-all duration-1000 ease-out ${isPageLoaded ? 'opacity-30 transform translate-y-0' : 'opacity-0 transform translate-y-8'
+                    }`} style={{ transitionDelay: '1800ms' }}>
+                    <svg
+                        viewBox="0 0 1200 120"
+                        preserveAspectRatio="none"
+                        className="w-full h-full"
+                    >
+                        <path
+                            d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1200,160,1248,128,1296,112L1344,96L1344,200L1296,200C1248,200,1152,200,1056,200C960,200,864,200,768,200C672,200,576,200,480,200C384,200,288,200,192,200C96,200,48,200,24,200L0,200Z"
+                            fill="rgba(0,255,153,0.1)"
+                        ></path>
+                    </svg>
                 </div>
             </div>
-        </div>
+            <Footer />
+        </>
     );
 };
 

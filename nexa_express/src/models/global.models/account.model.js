@@ -28,6 +28,11 @@ const accountSchema = new mongoose.Schema(
             required: true,
             default: false,
         },
+        role: {
+            type: String,
+            required: true,
+            enum: ["student", "tutor", "institution", "donor", "admin"]
+        }
     },
     {
         timestamps: true,
