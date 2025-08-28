@@ -13,6 +13,7 @@ import DonationPage from '../../pages/global.pages/landing.pages/donate.page'
 import LoginPage from '../../pages/global.pages/login.pages/login.page'
 import TncPage from '../../pages/global.pages/tnc.pages/tnc.page'
 import PrivacyPolicyPage from '../../pages/global.pages/tnc.pages/privacyPolicy.page'
+import ProtectedRoute from '../../components/global.components/routeProtector.component'
 
 function GlobalRoutes() {
     return (
@@ -26,11 +27,25 @@ function GlobalRoutes() {
             <Route path='/login' element={<LoginPage />}></Route>
             <Route path='register/*' element={<RegisterPage />}></Route>
 
-            <Route path='admin/*' element={<AdminRoutes />}></Route>
-            <Route path='donor/*' element={<DonorRoutes />}></Route>
-            <Route path='institution/*' element={<InstitutionRoutes />}></Route>
-            <Route path='student/*' element={<StudentRoutes />}></Route>
-            <Route path='tutor/*' element={<TutorRoutes />}></Route>
+            <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
+                <Route path="admin/*" element={<AdminRoutes />} />
+            </Route>
+
+            <Route element={<ProtectedRoute allowedRoles={["donor"]} />}>
+                <Route path="donor/*" element={<DonorRoutes />} />
+            </Route>
+
+            <Route element={<ProtectedRoute allowedRoles={["institution"]} />}>
+                <Route path="institution/*" element={<InstitutionRoutes />} />
+            </Route>
+
+            <Route element={<ProtectedRoute allowedRoles={["student"]} />}>
+                <Route path="student/*" element={<StudentRoutes />} />
+            </Route>
+
+            <Route element={<ProtectedRoute allowedRoles={["tutor"]} />}>
+                <Route path="tutor/*" element={<TutorRoutes />} />
+            </Route>
         </Routes>
     )
 }

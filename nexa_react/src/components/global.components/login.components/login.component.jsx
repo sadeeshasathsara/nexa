@@ -11,11 +11,15 @@ import {
     AlertCircle
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useNotify } from '../notification.components/notificationProvider.component';
+import { loginApi } from '../../../apis/global.apis/login.api';
+import { useGlobalLoading } from '../loading.components/loading.component';
 
 const LoginCard = () => {
     const [formData, setFormData] = useState({
         email: '',
-        password: ''
+        password: '',
+        rememberMe: ''
     });
     const [showPassword, setShowPassword] = useState(false);
     const [rememberMe, setRememberMe] = useState(false);
@@ -24,7 +28,10 @@ const LoginCard = () => {
     const [isLoaded, setIsLoaded] = useState(false);
     const [focusedField, setFocusedField] = useState(null);
 
+    const { setGlobalLoading } = useGlobalLoading();
+
     const navigate = useNavigate();
+    const notify = useNotify();
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -32,6 +39,10 @@ const LoginCard = () => {
         }, 100);
         return () => clearTimeout(timer);
     }, []);
+
+    useEffect(() => {
+        setFormData({ ...formData, rememberMe: rememberMe })
+    }, [rememberMe])
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -69,13 +80,20 @@ const LoginCard = () => {
     const handleSubmit = async () => {
         if (!validateForm()) return;
         setIsLoading(true);
+        setGlobalLoading(true)
         try {
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            console.log('Login attempt:', { ...formData, rememberMe });
-        } catch (error) {
-            console.error('Login failed:', error);
+            const res = await loginApi(formData);
+            if (!res || !res.success) {
+                notify(res.message, 'error');
+            } else {
+                notify(res.message, 'success');
+                navigate(res.data.url);
+            }
+        } catch (e) {
+            notify(e.message, 'error');
         } finally {
             setIsLoading(false);
+            setGlobalLoading(false);
         }
     };
 
@@ -152,6 +170,7 @@ const LoginCard = () => {
                                     type="email"
                                     id="email"
                                     name="email"
+                                    autoComplete="username"
                                     value={formData.email}
                                     onChange={handleInputChange}
                                     onFocus={() => setFocusedField('email')}
@@ -200,6 +219,7 @@ const LoginCard = () => {
                                     type={showPassword ? "text" : "password"}
                                     id="password"
                                     name="password"
+                                    autoComplete="password"
                                     value={formData.password}
                                     onChange={handleInputChange}
                                     onFocus={() => setFocusedField('password')}

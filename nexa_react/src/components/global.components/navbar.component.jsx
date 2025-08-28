@@ -72,7 +72,7 @@ export default function Navbar() {
     };
 
     return (
-        <nav className={`bg-white shadow-lg border-b border-gray-200 transition-all duration-300 z-50 ${isScrolled
+        <nav className={`bg-white shadow-lg border-b border-gray-200 transition-all duration-300 z-40 ${isScrolled
             ? 'fixed top-0 left-0 right-0'
             : 'relative'
             }`}>

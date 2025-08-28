@@ -17,7 +17,6 @@ const donorSchema = new mongoose.Schema({
   },
   email: {
     type: String,
-    required: [true, 'Email is required'],
     unique: true,
     lowercase: true,
     trim: true,
@@ -28,7 +27,7 @@ const donorSchema = new mongoose.Schema({
     trim: true,
     match: [/^[\+]?[1-9][\d]{0,15}$/, 'Please enter a valid phone number']
   },
-  
+
   // Account Security
   password: {
     type: String,
@@ -39,7 +38,7 @@ const donorSchema = new mongoose.Schema({
   passwordChangedAt: Date,
   passwordResetToken: String,
   passwordResetExpires: Date,
-  
+
   // Profile Information
   profilePicture: {
     type: String,
@@ -53,7 +52,7 @@ const donorSchema = new mongoose.Schema({
     enum: ['male', 'female', 'other', 'prefer-not-to-say'],
     default: 'prefer-not-to-say'
   },
-  
+
   // Address Information
   address: {
     street: String,
@@ -62,7 +61,7 @@ const donorSchema = new mongoose.Schema({
     country: String,
     zipCode: String
   },
-  
+
   // Donor Preferences
   preferredCauses: [{
     type: String,
@@ -72,7 +71,7 @@ const donorSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Institution'
   }],
-  
+
   // Donation Settings
   donationFrequency: {
     type: String,
@@ -84,7 +83,7 @@ const donorSchema = new mongoose.Schema({
     default: 'USD',
     enum: ['USD', 'EUR', 'GBP', 'CAD', 'AUD', 'JPY', 'INR', 'LKR']
   },
-  
+
   // Account Status
   isActive: {
     type: Boolean,
@@ -98,7 +97,7 @@ const donorSchema = new mongoose.Schema({
     type: Boolean,
     default: false
   },
-  
+
   // Timestamps
   lastLogin: Date,
   lastDonation: Date
@@ -112,9 +111,9 @@ donorSchema.index({ isActive: 1 });
 donorSchema.index({ preferredCauses: 1 });
 
 // Pre-save middleware to hash password
-donorSchema.pre('save', async function(next) {
+donorSchema.pre('save', async function (next) {
   if (!this.isModified('password')) return next();
-  
+
   try {
     const salt = await bcrypt.genSalt(12);
     this.password = await bcrypt.hash(this.password, salt);
@@ -125,12 +124,12 @@ donorSchema.pre('save', async function(next) {
 });
 
 // Instance method to check password
-donorSchema.methods.comparePassword = async function(candidatePassword) {
+donorSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
 };
 
 // Instance method to check if password was changed after token was issued
-donorSchema.methods.changedPasswordAfter = function(JWTTimestamp) {
+donorSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
   if (this.passwordChangedAt) {
     const changedTimestamp = parseInt(this.passwordChangedAt.getTime() / 1000, 10);
     return JWTTimestamp < changedTimestamp;
@@ -139,7 +138,7 @@ donorSchema.methods.changedPasswordAfter = function(JWTTimestamp) {
 };
 
 // Virtual for full name
-donorSchema.virtual('fullName').get(function() {
+donorSchema.virtual('fullName').get(function () {
   return `${this.firstName} ${this.lastName}`;
 });
 

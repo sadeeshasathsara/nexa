@@ -1,6 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
+import cookieParser from "cookie-parser";
 import connectDB from './src/config/database.config.js';
 import APIRouterV1 from './src/routes/global.routes/global.route.js';
 
@@ -14,6 +15,7 @@ app.use(cors({
     credentials: true
 }));
 app.use(express.json());
+app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
 //Main Route Check
