@@ -3,12 +3,33 @@ import bcrypt from "bcryptjs";
 
 /**
  * Create a new account
- * @param {Object} accountData - { firstName, lastName, email, password, tnc }
- * @returns {Object} created account
+ *
+ * Hashes the password and stores a new account in the database.
+ *
+ * @async
+ * @function createAccount
+ * @param {Object} accountData - Object containing account fields:
+ *   @param {string} accountData.firstName - First name of the user
+ *   @param {string} accountData.lastName - Last name of the user
+ *   @param {string} accountData.email - Email address
+ *   @param {string} accountData.password - Plain-text password
+ *   @param {boolean} accountData.tnc - Terms & Conditions accepted
+ *   @param {string} accountData.role - User role (student, tutor, institution, donor, admin)
+ * @returns {Promise<Object>} Created account document
+ * @throws {Error} If saving fails or validation fails
+ *
+ * @example
+ * const user = await createAccount({
+ *   firstName: "John",
+ *   lastName: "Doe",
+ *   email: "john@example.com",
+ *   password: "secret123",
+ *   tnc: true,
+ *   role: "student"
+ * });
  */
 export const createAccount = async (accountData) => {
     try {
-        // Hash password before saving
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(accountData.password, salt);
 
@@ -25,9 +46,16 @@ export const createAccount = async (accountData) => {
 };
 
 /**
- * Get accounts with optional query filters
- * @param {Object} query - Mongoose query object
- * @returns {Array} accounts
+ * Get all accounts with optional query filters
+ *
+ * @async
+ * @function getAccounts
+ * @param {Object} [query={}] - Mongoose query object to filter accounts
+ * @returns {Promise<Array>} Array of account documents
+ * @throws {Error} If query fails
+ *
+ * @example
+ * const students = await getAccounts({ role: "student" });
  */
 export const getAccounts = async (query = {}) => {
     try {
@@ -40,8 +68,15 @@ export const getAccounts = async (query = {}) => {
 
 /**
  * Get a single account by ID
- * @param {String} id - Account ID
- * @returns {Object} account
+ *
+ * @async
+ * @function getAccountById
+ * @param {string} id - MongoDB ObjectId of the account
+ * @returns {Promise<Object>} Account document
+ * @throws {Error} If account not found or query fails
+ *
+ * @example
+ * const user = await getAccountById("64f8a1e9c1234567890abcd1");
  */
 export const getAccountById = async (id) => {
     try {
@@ -55,9 +90,18 @@ export const getAccountById = async (id) => {
 
 /**
  * Update an account by ID
- * @param {String} id - Account ID
- * @param {Object} updateData - fields to update
- * @returns {Object} updated account
+ *
+ * Hashes the password if included in updateData.
+ *
+ * @async
+ * @function updateAccount
+ * @param {string} id - MongoDB ObjectId of the account
+ * @param {Object} updateData - Fields to update (firstName, lastName, password, etc.)
+ * @returns {Promise<Object>} Updated account document
+ * @throws {Error} If account not found or update fails
+ *
+ * @example
+ * const updatedUser = await updateAccount("64f8a1e9c1234567890abcd1", { firstName: "Jane" });
  */
 export const updateAccount = async (id, updateData) => {
     try {
@@ -81,8 +125,15 @@ export const updateAccount = async (id, updateData) => {
 
 /**
  * Delete an account by ID
- * @param {String} id - Account ID
- * @returns {Object} deleted account
+ *
+ * @async
+ * @function deleteAccount
+ * @param {string} id - MongoDB ObjectId of the account
+ * @returns {Promise<Object>} Deleted account document
+ * @throws {Error} If account not found or deletion fails
+ *
+ * @example
+ * const deletedUser = await deleteAccount("64f8a1e9c1234567890abcd1");
  */
 export const deleteAccount = async (id) => {
     try {

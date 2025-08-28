@@ -2,16 +2,44 @@ import { sendMail } from "./mail.service.js";
 import Otp from "../../models/global.models/otp.schema.js";
 import bcrypt from "bcryptjs";
 
+/**
+ * Generate a random 6-digit OTP
+ *
+ * @function generateOtp
+ * @returns {string} 6-digit OTP as a string
+ *
+ * @example
+ * const otp = generateOtp(); // "482915"
+ */
 export const generateOtp = () => {
     return Math.floor(100000 + Math.random() * 900000).toString();
 };
 
+/**
+ * Send OTP to a user's email
+ *
+ * Stores the hashed OTP in the database and emails the plain OTP to the user.
+ * - Updates existing OTP record for the email + IP or creates a new one.
+ * - OTP is valid for 5 minutes.
+ *
+ * @async
+ * @function sendOtp
+ * @param {string} email - Recipient's email address
+ * @param {string} clientIp - Client's IP address (for rate limiting)
+ * @returns {Promise<string>} Plain OTP (for internal use, not exposed to client)
+ * @throws {Error} If email sending or database operation fails
+ *
+ * @example
+ * const otp = await sendOtp("user@example.com", "192.168.1.1");
+ */
 export const sendOtp = async (email, clientIp) => {
     const otp = generateOtp();
 
+    // Hash the OTP before storing
     const salt = await bcrypt.genSalt(10);
     const hashedOtp = await bcrypt.hash(otp, salt);
 
+    // Upsert OTP document for email + IP
     const otpDoc = await Otp.findOneAndUpdate(
         { email: email.toLowerCase(), ip: clientIp },
         {
@@ -23,6 +51,7 @@ export const sendOtp = async (email, clientIp) => {
         { upsert: true, new: true, setDefaultsOnInsert: true }
     );
 
+    // HTML content of the OTP email
     const htmlContent = `
         <!DOCTYPE html>
         <html lang="en">
@@ -305,14 +334,36 @@ export const sendOtp = async (email, clientIp) => {
         </html>
     `;
 
+    // Send email
     await sendMail(email, "🔐 NEXA Verification Code - Complete Your Account Setup", htmlContent);
 
     return otp;
 };
 
+/**
+ * Validate OTP submitted by the user
+ *
+ * - Checks if an OTP exists for the email.
+ * - Verifies OTP is not expired (5 minutes).
+ * - Compares submitted OTP with stored hashed OTP.
+ * - Deletes OTP from database after successful validation.
+ *
+ * @async
+ * @function validateOtp
+ * @param {string} email - User's email address
+ * @param {string} otpCode - OTP code submitted by the user
+ * @returns {Promise<Object>} Result object:
+ *   - success: boolean
+ *   - message: descriptive message
+ *
+ * @example
+ * const result = await validateOtp("user@example.com", "482915");
+ * if(result.success) console.log("OTP verified!");
+ * else console.log(result.message);
+ */
 export const validateOtp = async (email, otpCode) => {
     try {
-        // Get the latest OTP for this email
+        // Get latest OTP for this email
         const otpDoc = await Otp.findOne({ email: email.toLowerCase() })
             .sort({ createdAt: -1 });
 
@@ -320,20 +371,20 @@ export const validateOtp = async (email, otpCode) => {
             return { success: false, message: "No OTP request found." };
         }
 
-        // Check if OTP has expired (5 minutes)
+        // Check expiration (5 minutes)
         const now = Date.now();
-        const expiryTime = otpDoc.createdAt.getTime() + (5 * 60 * 1000); // 5 min
+        const expiryTime = otpDoc.createdAt.getTime() + (5 * 60 * 1000);
         if (now > expiryTime) {
             return { success: false, message: "OTP has expired. Please request a new one." };
         }
 
-        // Compare provided OTP with hashed OTP
+        // Compare submitted OTP with hashed OTP
         const isMatch = await bcrypt.compare(otpCode, otpDoc.otp);
         if (!isMatch) {
             return { success: false, message: "Invalid OTP. Please try again." };
         }
 
-        // OTP is valid, remove it from DB
+        // OTP verified successfully, remove from DB
         await Otp.deleteOne({ _id: otpDoc._id });
 
         return { success: true, message: "OTP verified successfully." };

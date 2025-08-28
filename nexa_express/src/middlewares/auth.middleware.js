@@ -24,7 +24,7 @@ export const protect = async (req, res, next) => {
 
       // Get donor from token
       const donor = await Donor.findById(decoded.id).select('-password');
-      
+
       if (!donor) {
         return res.status(401).json({
           success: false,
@@ -84,7 +84,7 @@ export const optionalAuth = async (req, res, next) => {
 
         // Get donor from token
         const donor = await Donor.findById(decoded.id).select('-password');
-        
+
         if (donor && donor.isActive) {
           // Check if password was changed after token was issued
           if (!donor.changedPasswordAfter(decoded.iat)) {

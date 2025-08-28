@@ -8,30 +8,38 @@ import {
 
 /**
  * Create a new account
+ *
+ * @route POST /accounts
+ * @group Accounts - Operations related to user accounts
+ * @param {string} req.body.role - Role of the account (student, tutor, institution, donor, admin)
+ * @param {string} req.body.firstName - First name of the user
+ * @param {string} req.body.lastName - Last name of the user
+ * @param {string} req.body.email - Email address (must be unique)
+ * @param {string} req.body.password - Password for authentication
+ * @param {boolean} req.body.otpVerified - OTP verification status
+ * @param {boolean} req.body.tncAccepted - Whether the user accepted Terms & Conditions
+ * @returns {object} 201 - Newly created account
+ * @returns {Error} 400 - Validation or server error
  */
 export const createAccountController = async (req, res) => {
     try {
         const { role, firstName, lastName, email, password, otpVerified, tncAccepted, ...otherFields } = req.body;
 
-        // Default required fields for all accounts
         const defaultRequiredFields = ["firstName", "lastName", "email", "password", "tncAccepted"];
 
-        // Role-specific required fields (exclude default fields)
         const roleRequiredFields = {
-            student: ["role", /* add student-specific fields here */],
-            tutor: ["role", /* add tutor-specific fields here */],
-            institution: ["role", /* add institution-specific fields here */],
-            donor: ["role", /* add donor-specific fields here */],
-            admin: ["role", /* add admin-specific fields here */]
+            student: ["role"],
+            tutor: ["role"],
+            institution: ["role"],
+            donor: ["role"],
+            admin: ["role"]
         };
 
-        // Combine default + role-specific required fields
         const requiredFields = Array.from(new Set([
             ...defaultRequiredFields,
             ...(roleRequiredFields[role] || [])
         ]));
 
-        // Check for missing required fields
         const missingFields = requiredFields.filter(field => req.body[field] == null);
         if (missingFields.length > 0) {
             return res.status(400).json({
@@ -40,22 +48,14 @@ export const createAccountController = async (req, res) => {
             });
         }
 
-        // Additional validations
         if (otpVerified === false) {
-            return res.status(400).json({
-                success: false,
-                message: "OTP is not verified"
-            });
+            return res.status(400).json({ success: false, message: "OTP is not verified" });
         }
 
         if (tncAccepted === false) {
-            return res.status(400).json({
-                success: false,
-                message: "Terms and Conditions are not accepted"
-            });
+            return res.status(400).json({ success: false, message: "Terms and Conditions are not accepted" });
         }
 
-        // Save the common account data
         const accountData = {
             role,
             firstName,
@@ -68,25 +68,15 @@ export const createAccountController = async (req, res) => {
 
         const account = await createAccount(accountData);
 
-        // Handle role-specific logic
+        // Role-specific logic placeholder
         switch (role) {
             case "student":
-                // handle student-specific data
-                break;
             case "tutor":
-                // handle tutor-specific data
-                break;
             case "institution":
-                // handle institution-specific data
-                break;
             case "donor":
-                // handle donor-specific data
-                break;
             case "admin":
-                // handle admin-specific data
                 break;
             default:
-                // optional: handle unknown roles
                 break;
         }
 
@@ -97,7 +87,13 @@ export const createAccountController = async (req, res) => {
 };
 
 /**
- * Get all accounts (with optional query filters)
+ * Get all accounts
+ *
+ * @route GET /accounts
+ * @group Accounts - Operations related to user accounts
+ * @param {object} req.query - Optional query filters (e.g., { role: "student" })
+ * @returns {Array<object>} 200 - List of accounts
+ * @returns {Error} 400 - Server error
  */
 export const getAccountsController = async (req, res) => {
     try {
@@ -110,7 +106,13 @@ export const getAccountsController = async (req, res) => {
 };
 
 /**
- * Get a single account by ID
+ * Get an account by ID
+ *
+ * @route GET /accounts/:id
+ * @group Accounts - Operations related to user accounts
+ * @param {string} req.params.id - The account ID
+ * @returns {object} 200 - Account details
+ * @returns {Error} 404 - Account not found
  */
 export const getAccountByIdController = async (req, res) => {
     try {
@@ -123,6 +125,13 @@ export const getAccountByIdController = async (req, res) => {
 
 /**
  * Update an account by ID
+ *
+ * @route PUT /accounts/:id
+ * @group Accounts - Operations related to user accounts
+ * @param {string} req.params.id - The account ID
+ * @param {object} req.body - Fields to update
+ * @returns {object} 200 - Updated account
+ * @returns {Error} 400 - Validation or server error
  */
 export const updateAccountController = async (req, res) => {
     try {
@@ -135,6 +144,12 @@ export const updateAccountController = async (req, res) => {
 
 /**
  * Delete an account by ID
+ *
+ * @route DELETE /accounts/:id
+ * @group Accounts - Operations related to user accounts
+ * @param {string} req.params.id - The account ID
+ * @returns {object} 200 - Deleted account details
+ * @returns {Error} 404 - Account not found
  */
 export const deleteAccountController = async (req, res) => {
     try {
