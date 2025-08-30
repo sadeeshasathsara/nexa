@@ -5,6 +5,8 @@ import cookieParser from "cookie-parser";
 import connectDB from './src/config/database.config.js';
 import APIRouterV1 from './src/routes/global.routes/global.route.js';
 
+import APIRouterV1 from './src/routes/global_routes/global.route.js';
+
 dotenv.config();
 
 const app = express();
