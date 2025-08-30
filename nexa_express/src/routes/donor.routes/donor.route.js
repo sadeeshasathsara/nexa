@@ -1,9 +1,5 @@
 import express from 'express';
-<<<<<<< Updated upstream
 
-const router = express.Router();
-
-=======
 import {
   registerDonor,
   loginDonor,
@@ -27,7 +23,6 @@ import {
   validateResetPassword
 } from '../../middlewares/donor.middlewares/validation.middleware.js';
 
-const router = express.Router();
 
 // Ensure DB connection for donor routes only
 router.use(async (req, res, next) => {
@@ -40,7 +35,30 @@ router.use(async (req, res, next) => {
   }
 });
 
-// Public routes
+import {
+  registerDonor,
+  loginDonor,
+  getDonorProfile,
+  updateDonorProfile,
+  changePassword,
+  getDonorDonations,
+  getDonorStatistics,
+  forgotPassword,
+  resetPassword,
+  deleteDonorAccount
+} from '../../controllers/donor.controllers/donor.controller.js';
+import { protect } from '../../middlewares/auth.middleware.js';
+import {
+  validateDonorRegistration,
+  validateDonorLogin,
+  validateProfileUpdate,
+  validatePasswordChange,
+  validateForgotPassword,
+  validateResetPassword
+} from '../../middlewares/validation.middleware.js';
+
+const router = express.Router();
+
 router.post('/register', validateDonorRegistration, registerDonor);
 router.post('/login', validateDonorLogin, loginDonor);
 router.post('/forgot-password', validateForgotPassword, forgotPassword);
@@ -55,5 +73,4 @@ router.get('/donations', getDonorDonations);
 router.get('/statistics', getDonorStatistics);
 router.delete('/account', deleteDonorAccount);
 
->>>>>>> Stashed changes
 export default router;
