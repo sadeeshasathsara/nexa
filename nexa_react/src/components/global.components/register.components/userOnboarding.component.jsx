@@ -59,6 +59,7 @@ import RegisterStudent from "../../student.components/register.components/regist
 import RegisterTutor from "../../tutor.components/register.components/registerTutor.component";
 import RegisterInstitute from "../../institution.pages/register.components/registerInstitute.component";
 import RegisterDonor from "../../donor.components/register.components/registerDonor.component";
+import RegisterDonorPage from "../../../pages/donor.pages/register.pages/registerDonor.page";
 
 const RegistrationOnboarding = () => {
     const [role, setRole] = useState(null); // Selected role
@@ -157,7 +158,7 @@ const RegistrationOnboarding = () => {
             case "institute":
                 return <RegisterInstitute />;
             case "donor":
-                return <RegisterDonor />;
+                return <RegisterDonorPage />;
             default:
                 return (
                     <div
