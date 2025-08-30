@@ -1,5 +1,6 @@
 import express from 'express';
 
+
 import {
   registerDonor,
   loginDonor,
@@ -13,7 +14,6 @@ import {
   deleteDonorAccount
 } from '../../controllers/donor.controllers/donor.controller.js';
 import { protect } from '../../middlewares/donor.middlewares/auth.middleware.js';
-import ensureDonorDbConnected from '../../config/donor.config/donor.database.js';
 import {
   validateDonorRegistration,
   validateDonorLogin,
@@ -22,40 +22,6 @@ import {
   validateForgotPassword,
   validateResetPassword
 } from '../../middlewares/donor.middlewares/validation.middleware.js';
-
-
-// Ensure DB connection for donor routes only
-router.use(async (req, res, next) => {
-  try {
-    await ensureDonorDbConnected();
-    next();
-  } catch (err) {
-    console.error('Donor DB connection error:', err);
-    res.status(500).json({ success: false, message: 'Database connection error' });
-  }
-});
-
-import {
-  registerDonor,
-  loginDonor,
-  getDonorProfile,
-  updateDonorProfile,
-  changePassword,
-  getDonorDonations,
-  getDonorStatistics,
-  forgotPassword,
-  resetPassword,
-  deleteDonorAccount
-} from '../../controllers/donor.controllers/donor.controller.js';
-import { protect } from '../../middlewares/auth.middleware.js';
-import {
-  validateDonorRegistration,
-  validateDonorLogin,
-  validateProfileUpdate,
-  validatePasswordChange,
-  validateForgotPassword,
-  validateResetPassword
-} from '../../middlewares/validation.middleware.js';
 
 const router = express.Router();
 

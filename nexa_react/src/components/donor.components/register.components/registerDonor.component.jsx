@@ -19,7 +19,7 @@ const RegisterDonor = ({ onRegisterSuccess }) => {
     const password = watch('password');
 
     const causes = [
-        'education', 'healthcare', 'poverty', 'environment', 
+        'education', 'healthcare', 'poverty', 'environment',
         'arts', 'sports', 'technology', 'other'
     ];
 
@@ -45,13 +45,12 @@ const RegisterDonor = ({ onRegisterSuccess }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                     <input
-                        {...register('firstName', { 
+                        {...register('firstName', {
                             required: 'First name is required',
                             minLength: { value: 2, message: 'First name must be at least 2 characters' }
                         })}
-                        className={`w-full p-4 border rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-transparent ${
-                            errors.firstName ? 'border-red-300' : 'border-gray-200'
-                        }`}
+                        className={`w-full p-4 border rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-transparent ${errors.firstName ? 'border-red-300' : 'border-gray-200'
+                            }`}
                         placeholder="First Name"
                     />
                     {errors.firstName && (
@@ -60,13 +59,12 @@ const RegisterDonor = ({ onRegisterSuccess }) => {
                 </div>
                 <div>
                     <input
-                        {...register('lastName', { 
+                        {...register('lastName', {
                             required: 'Last name is required',
                             minLength: { value: 2, message: 'Last name must be at least 2 characters' }
                         })}
-                        className={`w-full p-4 border rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-transparent ${
-                            errors.lastName ? 'border-red-300' : 'border-gray-200'
-                        }`}
+                        className={`w-full p-4 border rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-transparent ${errors.lastName ? 'border-red-300' : 'border-gray-200'
+                            }`}
                         placeholder="Last Name"
                     />
                     {errors.lastName && (
@@ -77,16 +75,15 @@ const RegisterDonor = ({ onRegisterSuccess }) => {
 
             <div>
                 <input
-                    {...register('email', { 
+                    {...register('email', {
                         required: 'Email is required',
-                        pattern: { 
+                        pattern: {
                             value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
                             message: 'Invalid email address'
                         }
                     })}
-                    className={`w-full p-4 border rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-transparent ${
-                        errors.email ? 'border-red-300' : 'border-gray-200'
-                    }`}
+                    className={`w-full p-4 border rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-transparent ${errors.email ? 'border-red-300' : 'border-gray-200'
+                        }`}
                     placeholder="Email Address"
                 />
                 {errors.email && (
@@ -226,7 +223,7 @@ const RegisterDonor = ({ onRegisterSuccess }) => {
                 </label>
                 <div className="relative">
                     <input
-                        {...register('password', { 
+                        {...register('password', {
                             required: 'Password is required',
                             minLength: { value: 8, message: 'Password must be at least 8 characters' },
                             pattern: {
@@ -235,9 +232,8 @@ const RegisterDonor = ({ onRegisterSuccess }) => {
                             }
                         })}
                         type={showPassword ? 'text' : 'password'}
-                        className={`w-full p-4 pr-12 border rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-transparent ${
-                            errors.password ? 'border-red-300' : 'border-gray-200'
-                        }`}
+                        className={`w-full p-4 pr-12 border rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-transparent ${errors.password ? 'border-red-300' : 'border-gray-200'
+                            }`}
                         placeholder="Create Password"
                     />
                     <button
@@ -259,14 +255,13 @@ const RegisterDonor = ({ onRegisterSuccess }) => {
                 </label>
                 <div className="relative">
                     <input
-                        {...register('confirmPassword', { 
+                        {...register('confirmPassword', {
                             required: 'Please confirm your password',
                             validate: value => value === password || 'Passwords do not match'
                         })}
                         type={showConfirmPassword ? 'text' : 'password'}
-                        className={`w-full p-4 pr-12 border rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-transparent ${
-                            errors.confirmPassword ? 'border-red-300' : 'border-gray-200'
-                        }`}
+                        className={`w-full p-4 pr-12 border rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-transparent ${errors.confirmPassword ? 'border-red-300' : 'border-gray-200'
+                            }`}
                         placeholder="Confirm Password"
                     />
                     <button
@@ -288,17 +283,15 @@ const RegisterDonor = ({ onRegisterSuccess }) => {
         <div className="flex items-center justify-center mb-6">
             {[1, 2, 3].map((stepNumber) => (
                 <div key={stepNumber} className="flex items-center">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${
-                        stepNumber <= step 
-                            ? 'bg-rose-500 text-white' 
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold ${stepNumber <= step
+                            ? 'bg-rose-500 text-white'
                             : 'bg-gray-200 text-gray-500'
-                    }`}>
+                        }`}>
                         {stepNumber}
                     </div>
                     {stepNumber < 3 && (
-                        <div className={`w-12 h-1 mx-2 ${
-                            stepNumber < step ? 'bg-rose-500' : 'bg-gray-200'
-                        }`} />
+                        <div className={`w-12 h-1 mx-2 ${stepNumber < step ? 'bg-rose-500' : 'bg-gray-200'
+                            }`} />
                     )}
                 </div>
             ))}
@@ -341,7 +334,7 @@ const RegisterDonor = ({ onRegisterSuccess }) => {
                             Previous
                         </button>
                     )}
-                    
+
                     {step < 3 ? (
                         <button
                             type="button"
@@ -366,27 +359,4 @@ const RegisterDonor = ({ onRegisterSuccess }) => {
 };
 
 export default RegisterDonor;
-import { Heart } from 'lucide-react';
-import React from 'react'
-
-const RegisterDonor = () => (
-    <div className="bg-white rounded-3xl p-8 border border-rose-100">
-        <div className="text-center mb-6">
-            <div className="w-16 h-16 bg-gradient-to-br from-rose-500 to-pink-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Heart className="w-8 h-8 text-white" />
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Donor Registration</h2>
-            <p className="text-gray-600">Support education through giving</p>
-        </div>
-        <div className="space-y-4">
-            <input className="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-transparent" placeholder="Full Name" />
-            <input className="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-transparent" placeholder="Email Address" />
-            <button className="w-full bg-gradient-to-r from-rose-500 to-pink-600 text-white py-4 rounded-xl font-semibold hover:shadow-lg transition-all">
-                Create Donor Account
-            </button>
-        </div>
-    </div>
-);
-
-export default RegisterDonor
 

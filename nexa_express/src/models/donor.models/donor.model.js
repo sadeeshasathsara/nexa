@@ -17,7 +17,7 @@ const donorSchema = new mongoose.Schema({
   },
   email: {
     type: String,
- required: [true, 'Email is required'],
+    required: [true, 'Email is required'],
     unique: true,
     lowercase: true,
     trim: true,
@@ -98,60 +98,6 @@ const donorSchema = new mongoose.Schema({
 }, {
   timestamps: true
 });
-
-// Index for better query performance
-
-donorSchema.index({ email: 1 });
-
-donorSchema.index({ isActive: 1 });
-donorSchema.index({ preferredCauses: 1 });
-
-
-donorSchema.pre('save', async function(next) {
-  if (!this.isModified('password')) return next();
-  
-
-donorSchema.pre('save', async function (next) {
-  if (!this.isModified('password')) return next();
-
-  try {
-    const salt = await bcrypt.genSalt(12);
-    this.password = await bcrypt.hash(this.password, salt);
-    next();
-  } catch (error) {
-    next(error);
-  }
-});
-
-
-donorSchema.methods.comparePassword = async function(candidatePassword) {
-
-donorSchema.methods.comparePassword = async function (candidatePassword) {
-
-  return await bcrypt.compare(candidatePassword, this.password);
-};
-
-// Instance method to check if password was changed after token was issued
-
-donorSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
-
-  if (this.passwordChangedAt) {
-    const changedTimestamp = parseInt(this.passwordChangedAt.getTime() / 1000, 10);
-    return JWTTimestamp < changedTimestamp;
-  }
-  return false;
-};
-
-// Virtual for full name
-
-donorSchema.virtual('fullName').get(function () {
-
-  return `${this.firstName} ${this.lastName}`;
-});
-
-// Ensure virtual fields are serialized
-donorSchema.set('toJSON', { virtuals: true });
-donorSchema.set('toObject', { virtuals: true });
 
 const Donor = mongoose.model('Donor', donorSchema);
 
