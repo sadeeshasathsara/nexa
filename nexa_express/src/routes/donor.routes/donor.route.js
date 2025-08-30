@@ -1,9 +1,4 @@
 import express from 'express';
-<<<<<<< Updated upstream
-
-const router = express.Router();
-
-=======
 import {
   registerDonor,
   loginDonor,
@@ -55,5 +50,4 @@ router.get('/donations', getDonorDonations);
 router.get('/statistics', getDonorStatistics);
 router.delete('/account', deleteDonorAccount);
 
->>>>>>> Stashed changes
 export default router;

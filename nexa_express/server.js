@@ -1,11 +1,7 @@
 import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
-<<<<<<< Updated upstream
-import APIRouterV1 from './src/routes/global_routes/global.route.js';
-=======
 import APIRouterV1 from './src/routes/global.routes/global.route.js';
->>>>>>> Stashed changes
 
 dotenv.config();
 
