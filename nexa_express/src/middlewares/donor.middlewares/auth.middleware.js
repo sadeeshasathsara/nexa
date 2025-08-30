@@ -1,19 +1,5 @@
-
-export const protect = (req, res, next) => {
-    next();
-};
-
-export const authorize = () => (req, res, next) => {
-    next();
-};
-
-export const optionalAuth = (req, res, next) => {
-    next();
-};
-
-
 import jwt from 'jsonwebtoken';
-import Donor from '../models/donor.models/donor.model.js';
+import Donor from '../../models/donor.models/donor.model.js';
 
 // Protect routes - verify JWT token
 export const protect = async (req, res, next) => {
@@ -38,7 +24,7 @@ export const protect = async (req, res, next) => {
 
       // Get donor from token
       const donor = await Donor.findById(decoded.id).select('-password');
-
+      
       if (!donor) {
         return res.status(401).json({
           success: false,
@@ -98,7 +84,7 @@ export const optionalAuth = async (req, res, next) => {
 
         // Get donor from token
         const donor = await Donor.findById(decoded.id).select('-password');
-
+        
         if (donor && donor.isActive) {
           // Check if password was changed after token was issued
           if (!donor.changedPasswordAfter(decoded.iat)) {
@@ -139,3 +125,4 @@ export const authorize = (...roles) => {
     next();
   };
 };
+
