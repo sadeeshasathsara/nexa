@@ -10,7 +10,7 @@ function App() {
   return (
     <>
       <Routes>
-        <Route path='/' element={<DonorDashboard />} />
+
         <Route path='/*' element={<RedirectToDefaultRoute />} />
         <Route path='/v1/*' element={<GlobalRoutes />} />
         <Route path="/*" element={<RedirectToDefaultRoute />} />
