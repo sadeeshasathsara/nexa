@@ -10,6 +10,7 @@ import otpLimiter from '../../middlewares/global.middlewares/otpLimiter.middlewa
 import { createAccountController } from '../../controllers/global.controllers/account.controllers/account.controller.js';
 import { loginController } from '../../controllers/global.controllers/login.controllers/login.controller.js';
 import { checkAuth, checkRoleAccess } from '../../middlewares/global.middlewares/checkAuth.middleware.js';
+import { resetPasswordController } from '../../controllers/global.controllers/login.controllers/resetPassword.controller.js';
 
 const router = express.Router();
 
@@ -24,6 +25,7 @@ router.use('/v1/otp-validate', validateOtpController);
 
 router.use('/v1/register', createAccountController);
 router.use('/v1/login', loginController);
+router.use('/v1/reset-password', resetPasswordController);
 
 router.use('/v1/auth', checkAuth, (req, res) => {
     return res.status(200).json({ success: true, message: "Authenticated", data: req.user.role })
