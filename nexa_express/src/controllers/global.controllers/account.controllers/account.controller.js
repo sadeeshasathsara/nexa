@@ -5,6 +5,7 @@ import {
     updateAccount,
     deleteAccount
 } from "../../../services/global.services/account.service.js";
+import { createTutorDetails } from "../../../services/tutor.services/tutor.service.js";
 
 /**
  * Create a new account
@@ -72,6 +73,12 @@ export const createAccountController = async (req, res) => {
         switch (role) {
             case "student":
             case "tutor":
+                try {
+                    await createTutorDetails(account._id, otherFields);
+                } catch (err) {
+                    console.error("Tutor details error:", err);
+                }
+                break;
             case "institution":
             case "donor":
             case "admin":
