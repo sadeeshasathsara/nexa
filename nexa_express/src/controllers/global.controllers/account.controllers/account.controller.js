@@ -72,6 +72,7 @@ export const createAccountController = async (req, res) => {
         switch (role) {
             case "student":
             case "tutor":
+                
             case "institution":
             case "donor":
             case "admin":
