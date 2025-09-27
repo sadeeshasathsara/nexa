@@ -92,7 +92,7 @@ const Navbar = () => {
                 />
             )}
 
-            <nav className="bg-white shadow-lg border-b border-gray-100 top-0 z-50 backdrop-blur-sm bg-white/95">
+            <nav className="shadow-lg border-b sticky border-gray-100 top-0 z-50 backdrop-blur-sm bg-white/95">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between h-16">
 

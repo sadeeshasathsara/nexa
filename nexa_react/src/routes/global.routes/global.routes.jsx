@@ -14,6 +14,7 @@ import LoginPage from '../../pages/global.pages/login.pages/login.page'
 import TncPage from '../../pages/global.pages/tnc.pages/tnc.page'
 import PrivacyPolicyPage from '../../pages/global.pages/tnc.pages/privacyPolicy.page'
 import ProtectedRoute from '../../components/global.components/routeProtector.component'
+import CoursePage from '../../pages/student.pages/course.page'
 
 function GlobalRoutes() {
     return (
@@ -46,6 +47,8 @@ function GlobalRoutes() {
             <Route element={<ProtectedRoute allowedRoles={["tutor"]} />}>
                 <Route path="tutor/*" element={<TutorRoutes />} />
             </Route>
+
+            <Route path='c/*' element={<CoursePage />} />
         </Routes>
     )
 }
