@@ -1,0 +1,171 @@
+.admin-login {
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:1rem;
+    background:#fff;
+    color:#333;
+    font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif
+}
+.admin-login .login-container {
+    width:100%;
+    max-width:420px
+}
+.admin-login .header-section {
+    text-align:center;
+    margin-bottom:2rem
+}
+.admin-login .admin-icon {
+    background:#4285f4; 
+    padding:.75rem;
+    border-radius:50%;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    margin-bottom:1rem
+}
+.admin-login .page-title {
+    font-size:1.5rem;
+    font-weight:700;
+    margin-bottom:.5rem
+}
+.admin-login .page-subtitle {
+    color:#666;
+    font-size:.9rem
+}
+.admin-login .login-form {
+    background:#fff;
+    border:1px solid #e5e7eb;
+    border-radius:.75rem;
+    padding:2rem;
+    box-shadow:0 4px 6px rgba(0,0,0,.05)
+}
+.admin-login .form-group {
+    margin-bottom:1.5rem
+}
+.admin-login .form-label {
+    display:block;
+    margin-bottom:.5rem;
+    font-weight:500;
+    font-size:.875rem
+}
+.admin-login .form-input {
+    width:100%;
+    padding:.75rem 1rem;
+    border:1px solid #d1d5db;
+    border-radius:.5rem;
+    font-size:1rem;
+    transition:.2s;
+    color:#333
+}
+.admin-login .form-input:focus {
+    outline:none;
+    border-color:#4285f4;
+    box-shadow:0 0 0 3px rgba(66,133,244,.1)
+}
+.admin-login .form-input.error {
+    border-color:#ef4444;
+    background:#fef2f2
+}
+.admin-login .password-wrapper {
+    position:relative
+}
+.admin-login .password-toggle {
+    position:absolute;
+    right:.75rem;
+    top:50%;
+    transform:translateY(-50%);
+    background:none;
+    border:none;
+    color:#666;
+    cursor:pointer;
+    padding:.25rem
+}
+.admin-login .error-message {
+    margin-top:.25rem;
+    font-size:.875rem;
+    color:#ef4444
+}
+.admin-login .form-options {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:1.5rem;
+    font-size:.875rem
+}
+.admin-login .checkbox-wrapper {
+    display:flex;
+    align-items:center;
+    gap:.5rem
+}
+.admin-login .checkbox-wrapper input {
+    width:1rem;
+    height:1rem;
+    accent-color:#4285f4
+}
+.admin-login .forgot-link {
+    color:#4285f4;
+    text-decoration:none
+}
+.admin-login .forgot-link:hover {
+    text-decoration:underline
+}
+.admin-login .login-button {
+    width:100%;
+    padding:.75rem 1rem;
+    background:#4285f4;
+    color:#fff;
+    border:none;
+    border-radius:.5rem;
+    font-size:1rem;
+    font-weight:500;
+    cursor:pointer;
+    transition:.2s;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:.5rem
+}
+.admin-login .login-button:hover {
+    background:#3367d6
+}
+.admin-login .login-button:disabled {
+    background:#9ca3af;
+    cursor:not-allowed
+}
+.admin-login .loading-spinner {
+    width:1.25rem;
+    height:1.25rem;
+    border:2px solid transparent;
+    border-top:2px solid white;
+    border-radius:50%;
+    animation:spin 1s linear infinite
+}
+@keyframes spin {to{transform:rotate(360deg)}}
+
+.admin-login .security-notice {
+    margin-top:1.5rem;
+    padding:1rem;
+    background:#eff6ff;
+    border:1px solid #bfdbfe;
+    border-radius:.5rem
+}
+.admin-login .security-title {
+    font-size:.875rem;
+    font-weight:500;
+    color:#1e40af;
+    margin-bottom:.25rem
+}
+.admin-login .security-text {
+    font-size:.75rem;
+    color:#3b82f6;
+    line-height:1.4
+}
+.admin-login .footer-text {
+    text-align:center;
+    margin-top:1.5rem;
+    font-size:.875rem;
+    color:#666
+}
+@media (max-width:480px) {.admin-login .login-form{padding:1.5rem}}
