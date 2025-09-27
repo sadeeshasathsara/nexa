@@ -14,7 +14,7 @@ export const checkStudentProfileCompletedController = async (req, res) => {
     try {
         const accountId = req.user._id;
 
-        // Query the student profile for this account
+        // Query the     student profile for this account
         const profiles = await queryStudentProfiles({ accountId });
 
         if (!profiles || profiles.length === 0) {
