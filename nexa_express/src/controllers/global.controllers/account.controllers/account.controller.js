@@ -71,8 +71,9 @@ export const createAccountController = async (req, res) => {
         // Role-specific logic placeholder
         switch (role) {
             case "student":
+                createAccount(account._id);
+                break;
             case "tutor":
-                
             case "institution":
             case "donor":
             case "admin":

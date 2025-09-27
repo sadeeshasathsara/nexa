@@ -36,7 +36,7 @@ export const generateAccountToken = (account) => {
     try {
         // Step 1: Build JWT payload
         const payload = {
-            id: account._id,
+            _id: account._id,
             firstName: account.firstName,
             lastName: account.lastName,
             email: account.email,
