@@ -4,9 +4,9 @@
   "description": "An application to connect underprivileged students with volunteer tutors.",
   "main": "server.js",
   "type": "module",
- "scripts": {
-  "test": "echo \"Error: no test specified\" && exit 1",
-  "dev": "nodemon server.js"
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon server.js"
   },
   "repository": {
     "type": "git",

@@ -15,7 +15,12 @@ app.use(cors({
     origin: 'http://localhost:3000',
     credentials: true
 }));
+app.use(cors({
+    origin: 'http://localhost:3000',
+    credentials: true
+}));
 app.use(express.json());
+app.use(cookieParser());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
@@ -28,6 +33,8 @@ app.get('/', (req, res) => {
 app.use('/api', APIRouterV1);
 
 await connectDB();
+await connectDB();
 app.listen(PORT, () => {
+    console.log(`> Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
     console.log(`> Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
 });
