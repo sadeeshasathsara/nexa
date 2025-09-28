@@ -3,6 +3,8 @@ import { Route, Routes } from "react-router-dom";
 import TutorPage from "../../pages/tutor.pages/tutor.page";
 import TutorProfile from "../../pages/tutor.pages/tutor.profile.page";
 import TutorDashboard from "../../pages/tutor.pages/tutor.dashboard.page";
+import SessionScheduling from "../../pages/tutor.pages/tutor.session.sheduling";
+import MyCourses from "../../pages/tutor.pages/tutor.mycourses";
 
 function TutorRoutes() {
   return (
@@ -10,8 +12,8 @@ function TutorRoutes() {
       {/* Group 1: Routes WITH top navbar (using TutorPage as layout) */}
       <Route path="/" element={<TutorPage />}>
         <Route index element={<TutorDashboard />} />
-        <Route path="courses" element={<div>My Courses Page</div>} />
-        <Route path="schedule" element={<div>Schedule Page</div>} />
+        <Route path="courses" element={<MyCourses />} />
+        <Route path="schedule" element={<SessionScheduling />} />
         <Route path="assignments" element={<div>Assignments Page</div>} />
         <Route path="students" element={<div>Students Page</div>} />
         <Route path="analytics" element={<div>Analytics Page</div>} />
