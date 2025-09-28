@@ -1,6 +1,5 @@
 // pages/tutor.pages/tutor.profile.page.js
 import React, { useState, useEffect } from "react";
-import { tutorApi } from "../../apis/tutor.apis/profile.api";
 import { useNavigate } from "react-router-dom";
 import {
   User,
