@@ -1,6 +1,8 @@
+import BASE_URL from "../../tools/global.tools.js/baseUrl";
+
 // src/apis/admin.apis/admin.approvals.api.js
 const API = import.meta.env.VITE_API_HOST || "http://localhost:5000";
-const BASE = `${API}/api/v1/admin`;
+const BASE = `${BASE_URL}/admin`;
 
 export async function getPending(type) {
   const r = await fetch(`${BASE}/pending?type=${encodeURIComponent(type)}`, {

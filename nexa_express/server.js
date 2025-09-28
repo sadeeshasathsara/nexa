@@ -2,7 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import cookieParser from "cookie-parser";
-import connectDB from './src/config/databse.config.js';
+import connectDB from './src/config/database.config.js';
 
 import APIRouterV1 from './src/routes/global.routes/global.route.js';
 

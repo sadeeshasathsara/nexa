@@ -1,6 +1,6 @@
-// src/apis/admin.apis/admin.profile.api.js
-const API = import.meta.env.VITE_API_HOST || "http://localhost:5000";
-const BASE = `${API}/api/v1/admin`;
+import BASE_URL from "../../tools/global.tools.js/baseUrl";
+
+const BASE = `${BASE_URL}/admin`;
 
 export async function getAdminMe() {
   const r = await fetch(`${BASE}/me`, { credentials: "include" });

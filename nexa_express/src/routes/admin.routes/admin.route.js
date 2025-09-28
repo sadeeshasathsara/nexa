@@ -56,7 +56,7 @@ const corsCfg = cors({
 router.use(corsCfg);
 
 // Public auth
-router.post("/auth/login", requireFields(["email", "password"]), postAdminLogin);
+
 router.post("/auth/logout", postAdminLogout);
 router.post("/auth/signup", requireFields(["name", "email", "password"]), postAdminSignup);
 router.post("/forgot", forgotAdminPassword);
