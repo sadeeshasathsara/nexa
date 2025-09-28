@@ -43,7 +43,7 @@ const CourseCard = ({ course }) => (
                     <span className="text-sm font-medium whitespace-nowrap">{course.rating}</span>
                     <span className="text-gray-500 text-sm whitespace-nowrap">({course.reviews})</span>
                 </div>
-                <button className="bg-gradient-to-r cursor-pointer bg-[#00c951] hover:bg-[#02aa45] text-white text-sm font-semibold px-5 py-2 rounded-full shadow-md hover:shadow-lg transform hover:scale-102 transition-all duration-300">
+                <button onClick={() => { window.location.href = `/v1/c/${course.id}` }} className="bg-gradient-to-r cursor-pointer bg-[#00c951] hover:bg-[#02aa45] text-white text-sm font-semibold px-5 py-2 rounded-full shadow-md hover:shadow-lg transform hover:scale-102 transition-all duration-300">
                     Enroll Now
                 </button>
             </div>
