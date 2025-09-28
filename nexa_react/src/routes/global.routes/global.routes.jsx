@@ -28,7 +28,7 @@ function GlobalRoutes() {
             <Route path='/login' element={<LoginPage />}></Route>
             <Route path='register/*' element={<RegisterPage />}></Route>
 
-            <Route element={<ProtectedRoute allowedRoles={["admin"]} />}>
+            <Route>
                 <Route path="admin/*" element={<AdminRoutes />} />
             </Route>
 

@@ -12,10 +12,12 @@ import { createAccountController } from '../../controllers/global.controllers/ac
 import { loginController } from '../../controllers/global.controllers/login.controllers/login.controller.js';
 import { checkAuth, checkRoleAccess } from '../../middlewares/global.middlewares/checkAuth.middleware.js';
 import { resetPasswordController } from '../../controllers/global.controllers/login.controllers/resetPassword.controller.js';
+import { postAdminLogin } from '../../controllers/admin.controllers/admin.auth.controller.js';
+import { requireFields } from '../../middlewares/admin.middlewares/validate.middleware.js';
 
 const router = express.Router();
 
-router.use('/v1/admin', checkAuth, checkRoleAccess, AdminRoutes);
+router.use('/v1/admin', AdminRoutes);
 router.use('/v1/donor', checkAuth, checkRoleAccess, DonorRoutes);
 router.use('/v1/institution', checkAuth, checkRoleAccess, InstuitutionRoutes);
 router.use('/v1/student', checkAuth, checkRoleAccess, StudentRoutes);
@@ -27,6 +29,8 @@ router.use('/v1/otp-validate', validateOtpController);
 router.use('/v1/register', createAccountController);
 router.use('/v1/login', loginController);
 router.use('/v1/reset-password', resetPasswordController);
+
+router.post("/v2/admin/login", requireFields(["email", "password"]), postAdminLogin);
 
 router.use('/v1/auth', checkAuth, (req, res) => {
     return res.status(200).json({ success: true, message: "Authenticated", data: req.user.role })

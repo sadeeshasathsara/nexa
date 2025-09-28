@@ -4,7 +4,8 @@ import { loginAdmin, signupAdmin, setAdminResetEmail, } from "../../services/adm
 
 export async function postAdminLogin(req, res) {
   try {
-    const { admin } = await loginAdmin(req.body); // bcrypt compare etc.
+    const {email, password} = req.body;
+    const { admin } = await loginAdmin({ email, password }); // bcrypt compare etc.
 
     const sess = await Session.create({
       adminId: admin.id,

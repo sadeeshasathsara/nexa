@@ -3,6 +3,7 @@ import crypto from "crypto";
 import nodemailer from "nodemailer";
 import User from "../../models/admin.models/User.model.js";
 import { comparePassword, signJWT, hashPassword } from "../../utils/admin.utils/admin.utils.js";
+import { log } from "console";
 
 /* -----------------------------
  * Config / helpers
@@ -63,10 +64,15 @@ const MAIL_FROM =
  * Login admin
  */
 export async function loginAdmin({ email, password }) {
-  const admin = await User.findOne({ email: normEmail(email), role: "admin" });
+  const admin = await User.findOne({ email: normEmail(email) });
+
+  
   if (!admin) throw new Error("Admin not found");
 
-  if (admin.status !== "active" && admin.status !== "approved") {
+
+  
+
+  if (admin.status !== "active") {
     throw new Error("Admin account is not active");
   }
 

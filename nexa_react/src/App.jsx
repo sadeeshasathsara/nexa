@@ -11,10 +11,9 @@ function App() {
     <>
       <Routes>
 
-        <Route path='/*' element={<RedirectToDefaultRoute />} />
         <Route path='/v1/*' element={<GlobalRoutes />} />
         <Route path="/*" element={<RedirectToDefaultRoute />} />
-        <Route path="/v1/*" element={<GlobalRoutes />} />
+
       </Routes>
     </>
   )
