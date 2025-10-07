@@ -5,6 +5,8 @@ import AdminDashboardPage from "../../pages/admin.pages/admin.dashboard.page.jsx
 import AdminSettingsPage from "../../pages/admin.pages/admin.settings.page.jsx";
 import AdminRegisterPage from "../../pages/admin.pages/admin.register.page.jsx";
 import AdminApprovalsPage from "../../pages/admin.pages/admin.approvals.page.jsx";
+import AdminForgotPasswordPage from "../../pages/admin.pages/admin.forgot.password.page.jsx";
+
 
 
 export default function AdminRoutes() {
@@ -12,6 +14,8 @@ export default function AdminRoutes() {
     <Routes>
       {/* /v1/admin/login */}
       <Route path="login" element={<AdminLoginPage />} />
+      <Route path="forgot" element={<AdminForgotPasswordPage />} />
+
       
       <Route element = {<RequireAdmin/>}>
         <Route path="dashboard" element={<AdminDashboardPage />} />

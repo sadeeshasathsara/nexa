@@ -1,17 +1,29 @@
-import BASE_URL from "../../tools/global.tools.js/baseUrl";
+import axios from 'axios';
 
-export async function adminLogin({ email, password }) {
-  // Build URL-encoded body to avoid CORS preflight
-  const body = new URLSearchParams({ email, password }).toString();
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5000/api/v1';
 
-  const r = await fetch(`http://localhost:5000/api/v2/admin/login`, {
-    method: "POST",
-    credentials: "include",                    // send/receive cookie
-    headers: { "Content-Type": "application/x-www-form-urlencoded" }, // simple request
-    body,
-  });
+// Create axios instance with correct base URL
+const api = axios.create({
+  baseURL: API_BASE,
+  withCredentials: true,
+  timeout: 10000,
+});
 
-  const data = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error(data?.message || `HTTP ${r.status}`);
-  return data; // { ok, admin }
+export async function adminLogin(credentials) {
+  try {
+    console.log('Sending login request to:', `${API_BASE}/admin/auth/login`);
+    console.log('Credentials:', { email: credentials.email, password: '***' });
+    
+    const response = await api.post('/admin/auth/login', credentials);
+    console.log('Login response:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Login API error:', {
+      message: error.message,
+      response: error.response?.data,
+      status: error.response?.status,
+      url: error.config?.url
+    });
+    throw error;
+  }
 }

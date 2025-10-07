@@ -19,12 +19,16 @@
   },
   "homepage": "https://github.com/sadeeshasathsara/nexa#readme",
   "dependencies": {
+    "@fortawesome/free-solid-svg-icons": "^7.0.1",
+    "@fortawesome/react-fontawesome": "^3.0.2",
     "bcryptjs": "^3.0.2",
     "body-parser": "^2.2.0",
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.18.0"
+    "mongoose": "^8.18.0",
+    "react-calendar": "^6.0.0",
+    "recharts": "^3.2.1"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"

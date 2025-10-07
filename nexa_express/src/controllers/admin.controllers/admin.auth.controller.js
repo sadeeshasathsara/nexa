@@ -1,70 +1,83 @@
 // src/controllers/admin.controllers/admin.auth.controller.js
-import Session from "../../models/admin.models/Session.model.js";
-import { loginAdmin, signupAdmin, setAdminResetEmail, } from "../../services/admin.services/admin.services.js";
+import {
+  loginAdmin,
+  signupAdmin,
+  getMe as getMeSvc,
+  patchMe as patchMeSvc,
+  patchMyPassword as patchMyPasswordSvc,
+} from "../../services/admin.services/admin.services.js";
+
+import { sendResetPasswordEmail } from "../../services/admin.services/admin.auth.service.js";
+
+/* ----------- Auth endpoints ----------- */
 
 export async function postAdminLogin(req, res) {
   try {
-    const {email, password} = req.body;
-    const { admin } = await loginAdmin({ email, password }); // bcrypt compare etc.
-
-    const sess = await Session.create({
-      adminId: admin.id,
-      ip: req.ip,
-      ua: req.headers["user-agent"] || "",
-    });
-
-    res.cookie("nexa_admin_sid", String(sess._id), {
-      httpOnly: true,
-      secure: false,  // set true in prod (HTTPS)
-      sameSite: "lax",
-      path: "/",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-
-    res.json({ ok: true, admin });
+    const { email, password } = req.body || {};
+    const out = await loginAdmin({ email, password });
+    // If you use cookie session, set it here. For now just return data.
+    return res.json(out);
   } catch (err) {
-    res.status(401).json({ message: err.message || "Unauthorized" });
+    return res.status(400).json({ message: err.message || "Login failed" });
   }
 }
 
-export async function postAdminLogout(req, res) {
-  try {
-    const sid = req.cookies?.nexa_admin_sid;
-    if (sid) await Session.deleteOne({ _id: sid }).catch(() => null);
-    res.clearCookie("nexa_admin_sid", { path: "/" });
-    res.json({ ok: true });
-  } catch {
-    res.json({ ok: true });
-  }
+export async function postAdminLogout(_req, res) {
+  // If using sessions/cookies, clear them here.
+  return res.json({ message: "Logged out" });
 }
 
-/**
- * POST /api/v1/admin/auth/signup
- * Body: { name, email, password }
- * Creates a new admin (protected upstream in your routes).
- */
 export async function postAdminSignup(req, res) {
   try {
-    const admin = await signupAdmin(req.body);
-    res.status(201).json({ ok: true, admin });
+    const { name, email, password } = req.body || {};
+    const admin = await signupAdmin({ name, email, password });
+    return res.json({ message: "Admin created", admin });
   } catch (err) {
-    res.status(400).json({ message: err.message || "Signup failed" });
+    return res.status(400).json({ message: err.message || "Signup failed" });
   }
 }
 
-/**
- * POST /api/v1/admin/forgot
- * Body: { email }
- * Sends a reset email using setAdminResetEmail(service).
- */
-export async function forgotAdminPassword(req, res) {
+export async function forgotPassword(req, res) {
   try {
-    const email = (req.body?.email || "").trim();
+    const { email } = req.body || {};
     if (!email) return res.status(400).json({ message: "Email is required" });
-
-    await setAdminResetEmail(email);
-    res.json({ ok: true, message: "Password reset email sent (if account exists)" });
+    const msg = await sendResetPasswordEmail(email);
+    return res.json({ message: msg });
   } catch (err) {
-    res.status(400).json({ message: err.message || "Failed to send reset email" });
+    const known = ["Admin not found", "Mail config missing"];
+    const status = known.includes(err.message) ? 400 : 500;
+    return res.status(status).json({ message: err.message || "Failed to send reset email" });
+  }
+}
+
+/* ----------- Me/Profile endpoints (if you call them) ----------- */
+
+export async function getAdminMe(req, res) {
+  try {
+    const id = req.admin?.id || req.user?.id; // depends on your auth middleware
+    const me = await getMeSvc(id);
+    return res.json(me);
+  } catch (err) {
+    return res.status(400).json({ message: err.message || "Failed to fetch profile" });
+  }
+}
+
+export async function patchAdminMe(req, res) {
+  try {
+    const id = req.admin?.id || req.user?.id;
+    const me = await patchMeSvc(id, req.body || {});
+    return res.json({ message: "Updated", me });
+  } catch (err) {
+    return res.status(400).json({ message: err.message || "Update failed" });
+  }
+}
+
+export async function patchAdminPassword(req, res) {
+  try {
+    const id = req.admin?.id || req.user?.id;
+    const ok = await patchMyPasswordSvc(id, req.body || {});
+    return res.json({ message: ok ? "Password changed" : "No change" });
+  } catch (err) {
+    return res.status(400).json({ message: err.message || "Password change failed" });
   }
 }

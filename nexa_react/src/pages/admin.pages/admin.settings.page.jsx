@@ -1,14 +1,16 @@
 import { useEffect, useState } from "react";
-import "../../assets/admin.assets/admin.dashboard.css"; // reuse styles
+import "../../assets/admin.assets/admin.dashboard.css";
+import "../../assets/admin.assets/admin.settings.css";
 import AdminHeader from "../../components/admin.components/admin.header";
 import AdminSidebar from "../../components/admin.components/admin.sidebar";
 import { getAdminMe, updateAdminMe, changeAdminPasswordApi } from "../../apis/admin.apis/admin.profile.api";
 
 export default function AdminSettingsPage() {
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving]   = useState(false);
+  const [saving, setSaving] = useState(false);
   const [pwdBusy, setPwdBusy] = useState(false);
-  const [error, setError]     = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [me, setMe] = useState({ name: "", email: "" });
 
   // password form state
@@ -34,25 +36,29 @@ export default function AdminSettingsPage() {
     mismatch;
 
   useEffect(() => {
-    (async () => {
-      try {
-        const profile = await getAdminMe();
-        setMe({ name: profile.name || "", email: profile.email || "" });
-      } catch (e) {
-        setError(e?.response?.data?.message || "Failed to load profile");
-      } finally {
-        setLoading(false);
-      }
-    })();
+    loadProfile();
   }, []);
+
+  async function loadProfile() {
+    try {
+      const profile = await getAdminMe();
+      setMe({ name: profile.name || "", email: profile.email || "" });
+    } catch (e) {
+      setError(e?.response?.data?.message || "Failed to load profile");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   async function saveProfile(e) {
     e.preventDefault();
     setError("");
+    setSuccess("");
     setSaving(true);
     try {
       const updated = await updateAdminMe({ name: me.name, email: me.email });
       setMe({ name: updated.name, email: updated.email });
+      setSuccess("Profile updated successfully!");
     } catch (e) {
       setError(e?.response?.data?.message || "Update failed");
     } finally {
@@ -64,6 +70,7 @@ export default function AdminSettingsPage() {
     e.preventDefault();
     if (invalidPwd) return;
     setError("");
+    setSuccess("");
     setPwdBusy(true);
     try {
       await changeAdminPasswordApi({
@@ -71,7 +78,7 @@ export default function AdminSettingsPage() {
         newPassword: pwd.newPassword,
       });
       setPwd({ currentPassword: "", newPassword: "", confirmPassword: "" });
-      alert("Password updated");
+      setSuccess("Password updated successfully!");
     } catch (e) {
       setError(e?.response?.data?.message || "Password update failed");
     } finally {
@@ -79,175 +86,262 @@ export default function AdminSettingsPage() {
     }
   }
 
-  // inline SVG icons (eye / eye-off)
-  const Eye = (
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-      <circle cx="12" cy="12" r="3"/>
-    </svg>
-  );
-  const EyeOff = (
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.5 18.5 0 0 1 5.06-5.94"/>
-      <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
-      <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/>
-      <line x1="1" y1="1" x2="23" y2="23"/>
-    </svg>
-  );
+  const clearMessages = () => {
+    setError("");
+    setSuccess("");
+  };
 
   return (
-    <div className="admin-shell">
+    <div className="admin-dashboard">
       <AdminHeader />
       <AdminSidebar />
 
-      <main className="main">
-        <h1 className="page-title">Settings</h1>
-        <p className="page-sub">Manage your admin profile and security</p>
+      <main className="dashboard-main">
+        {/* Header Section */}
+        <div className="dashboard-header">
+          <div className="header-content">
+            <h1 className="welcome-title">Admin Settings</h1>
+            <p className="welcome-subtitle">Manage your profile and security settings</p>
+          </div>
+          <div className="header-actions">
+            <div className="admin-badge">
+              <i className="bx bx-shield-quarter"></i>
+              Administrator
+            </div>
+          </div>
+        </div>
 
+        {/* Messages */}
         {error && (
-          <div className="card" style={{ borderColor: "#FF3B30", padding: 16, marginBottom: 16, color: "#FF3B30" }}>
-            {error}
+          <div className="message-card error" onClick={clearMessages}>
+            <i className="bx bx-error-circle"></i>
+            <div className="message-content">
+              <div className="message-title">Error</div>
+              <div className="message-text">{error}</div>
+            </div>
+            <i className="bx bx-x close-icon"></i>
           </div>
         )}
 
-        {/* Profile */}
-        <section className="card" style={{ marginBottom: 24 }}>
-          <div className="card-header">
-            <h3 className="card-title">Profile</h3>
-            <a className="card-action" href="/v1/admin/register"> + Add new admin</a>
+        {success && (
+          <div className="message-card success" onClick={clearMessages}>
+            <i className="bx bx-check-circle"></i>
+            <div className="message-content">
+              <div className="message-title">Success</div>
+              <div className="message-text">{success}</div>
+            </div>
+            <i className="bx bx-x close-icon"></i>
           </div>
-          <div style={{ padding: 20 }}>
-            {loading ? (
-              <div>Loading...</div>
-            ) : (
-              <form onSubmit={saveProfile} style={{ display:"grid", gap:12, maxWidth: 480 }}>
-                <label>
-                  <div className="stat-label" style={{ marginBottom:6 }}>Name</div>
-                  <input
-                    className="search-bar"
-                    style={{ width:"100%" }}
-                    value={me.name}
-                    onChange={(e)=>setMe({...me, name:e.target.value})}
-                    placeholder="Admin name"
-                    required
-                  />
-                </label>
-                <label>
-                  <div className="stat-label" style={{ marginBottom:6 }}>Email</div>
-                  <input
-                    className="search-bar"
-                    style={{ width:"100%" }}
-                    type="email"
-                    value={me.email}
-                    onChange={(e)=>setMe({...me, email:e.target.value})}
-                    placeholder="admin@example.com"
-                    required
-                  />
-                </label>
-                <div>
-                  <button className="btn btn-primary" type="submit" disabled={saving}>
-                    {saving ? "Saving..." : "Save changes"}
+        )}
+
+        <div className="settings-content">
+          {/* Profile Section */}
+          <section className="settings-section">
+            <div className="section-header">
+              <div className="section-title">
+                <i className="bx bx-user"></i>
+                Profile Information
+              </div>
+              <p className="section-subtitle">Update your personal information</p>
+            </div>
+
+            <div className="settings-card">
+              {loading ? (
+                <div className="loading-state">
+                  <div className="loading-spinner"></div>
+                  Loading profile...
+                </div>
+              ) : (
+                <form onSubmit={saveProfile} className="settings-form">
+                  <div className="form-group">
+                    <label className="form-label">
+                      <span className="label-text">Full Name</span>
+                      <span className="label-required">*</span>
+                    </label>
+                    <div className="input-container">
+                      <i className="bx bx-user input-icon"></i>
+                      <input
+                        className="form-input"
+                        type="text"
+                        value={me.name}
+                        onChange={(e) => setMe({...me, name: e.target.value})}
+                        placeholder="Enter your full name"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">
+                      <span className="label-text">Email Address</span>
+                      <span className="label-required">*</span>
+                    </label>
+                    <div className="input-container">
+                      <i className="bx bx-envelope input-icon"></i>
+                      <input
+                        className="form-input"
+                        type="email"
+                        value={me.email}
+                        onChange={(e) => setMe({...me, email: e.target.value})}
+                        placeholder="Enter your email address"
+                        required
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-actions">
+                    <button 
+                      className="btn-primary" 
+                      type="submit" 
+                      disabled={saving}
+                    >
+                      {saving ? (
+                        <>
+                          <div className="loading-spinner small white"></div>
+                          Saving Changes...
+                        </>
+                      ) : (
+                        <>
+                          <i className="bx bx-save"></i>
+                          Save Changes
+                        </>
+                      )}
+                    </button>
+                    <a href="/v1/admin/register" className="btn-secondary">
+                      <i className="bx bx-user-plus"></i>
+                      Add New Admin
+                    </a>
+                  </div>
+                </form>
+              )}
+            </div>
+          </section>
+
+          {/* Security Section */}
+          <section className="settings-section">
+            <div className="section-header">
+              <div className="section-title">
+                <i className="bx bx-lock-alt"></i>
+                Security Settings
+              </div>
+              <p className="section-subtitle">Change your password and security preferences</p>
+            </div>
+
+            <div className="settings-card">
+              <form onSubmit={changePwd} className="settings-form">
+                <div className="form-group">
+                  <label className="form-label">
+                    <span className="label-text">Current Password</span>
+                    <span className="label-required">*</span>
+                  </label>
+                  <div className="input-container password">
+                    <i className="bx bx-lock input-icon"></i>
+                    <input
+                      className="form-input"
+                      type={show.current ? "text" : "password"}
+                      value={pwd.currentPassword}
+                      onChange={(e) => setPwd({...pwd, currentPassword: e.target.value})}
+                      placeholder="Enter current password"
+                      required
+                    />
+                    <button
+                      type="button"
+                      className="password-toggle"
+                      onClick={() => setShow(s => ({ ...s, current: !s.current }))}
+                    >
+                      <i className={`bx ${show.current ? 'bx-hide' : 'bx-show'}`}></i>
+                    </button>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">
+                    <span className="label-text">New Password</span>
+                    <span className="label-required">*</span>
+                  </label>
+                  <div className="input-container password">
+                    <i className="bx bx-key input-icon"></i>
+                    <input
+                      className="form-input"
+                      type={show.new ? "text" : "password"}
+                      value={pwd.newPassword}
+                      onChange={(e) => setPwd({...pwd, newPassword: e.target.value})}
+                      placeholder="At least 6 characters"
+                      required
+                    />
+                    <button
+                      type="button"
+                      className="password-toggle"
+                      onClick={() => setShow(s => ({ ...s, new: !s.new }))}
+                    >
+                      <i className={`bx ${show.new ? 'bx-hide' : 'bx-show'}`}></i>
+                    </button>
+                  </div>
+                  {pwd.newPassword && pwd.newPassword.length < 6 && (
+                    <div className="input-hint error">
+                      Password must be at least 6 characters long
+                    </div>
+                  )}
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">
+                    <span className="label-text">Confirm New Password</span>
+                    <span className="label-required">*</span>
+                  </label>
+                  <div className="input-container password">
+                    <i className="bx bx-key input-icon"></i>
+                    <input
+                      className="form-input"
+                      type={show.confirm ? "text" : "password"}
+                      value={pwd.confirmPassword}
+                      onChange={(e) => setPwd({...pwd, confirmPassword: e.target.value})}
+                      placeholder="Confirm your new password"
+                      required
+                    />
+                    <button
+                      type="button"
+                      className="password-toggle"
+                      onClick={() => setShow(s => ({ ...s, confirm: !s.confirm }))}
+                    >
+                      <i className={`bx ${show.confirm ? 'bx-hide' : 'bx-show'}`}></i>
+                    </button>
+                  </div>
+                  {mismatch && (
+                    <div className="input-hint error">
+                      New password and confirm password do not match
+                    </div>
+                  )}
+                  {pwd.confirmPassword && !mismatch && (
+                    <div className="input-hint success">
+                      Passwords match
+                    </div>
+                  )}
+                </div>
+
+                <div className="form-actions">
+                  <button 
+                    className="btn-primary" 
+                    type="submit" 
+                    disabled={pwdBusy || invalidPwd}
+                  >
+                    {pwdBusy ? (
+                      <>
+                        <div className="loading-spinner small white"></div>
+                        Updating Password...
+                      </>
+                    ) : (
+                      <>
+                        <i className="bx bx-refresh"></i>
+                        Update Password
+                      </>
+                    )}
                   </button>
                 </div>
               </form>
-            )}
-          </div>
-        </section>
-
-        {/* Security */}
-        <section className="card">
-          <div className="card-header">
-            <h3 className="card-title">Security</h3>
-          </div>
-          <div style={{ padding: 20 }}>
-            <form onSubmit={changePwd} style={{ display:"grid", gap:12, maxWidth: 480 }}>
-              {/* Current password */}
-              <label>
-                <div className="stat-label" style={{ marginBottom:6 }}>Current password</div>
-                <div className="pwd-wrap">
-                  <input
-                    className="search-bar password-input"
-                    type={show.current ? "text" : "password"}
-                    name="current-password"
-                    placeholder="current-password"
-                    autoComplete="current-password"
-                    value={pwd.currentPassword}
-                    onChange={(e)=>setPwd({...pwd, currentPassword:e.target.value})}
-                    required
-                  />
-                  <button
-                    type="button"
-                    className="pwd-toggle"
-                    onClick={()=>setShow(s=>({ ...s, current: !s.current }))}
-                    aria-label={show.current ? "Hide current password" : "Show current password"}
-                    title={show.current ? "Hide" : "Show"}
-                  >
-                    {show.current ? EyeOff : Eye}
-                  </button>
-                </div>
-              </label>
-
-              {/* New password */}
-              <label>
-                <div className="stat-label" style={{ marginBottom:6 }}>New password</div>
-                <div className="pwd-wrap">
-                  <input
-                    className="search-bar password-input"
-                    type={show.new ? "text" : "password"}
-                    placeholder="At least 6 characters"
-                    value={pwd.newPassword}
-                    onChange={(e)=>setPwd({...pwd, newPassword:e.target.value})}
-                    required
-                  />
-                  <button
-                    type="button"
-                    className="pwd-toggle"
-                    onClick={()=>setShow(s=>({ ...s, new: !s.new }))}
-                    aria-label={show.new ? "Hide new password" : "Show new password"}
-                    title={show.new ? "Hide" : "Show"}
-                  >
-                    {show.new ? EyeOff : Eye}
-                  </button>
-                </div>
-              </label>
-
-              {/* Confirm new password */}
-              <label>
-                <div className="stat-label" style={{ marginBottom:6 }}>Confirm new password</div>
-                <div className="pwd-wrap">
-                  <input
-                    className="search-bar password-input"
-                    type={show.confirm ? "text" : "password"}
-                    placeholder="Re-type new password"
-                    value={pwd.confirmPassword}
-                    onChange={(e)=>setPwd({...pwd, confirmPassword:e.target.value})}
-                    required
-                  />
-                  <button
-                    type="button"
-                    className="pwd-toggle"
-                    onClick={()=>setShow(s=>({ ...s, confirm: !s.confirm }))}
-                    aria-label={show.confirm ? "Hide confirm password" : "Show confirm password"}
-                    title={show.confirm ? "Hide" : "Show"}
-                  >
-                    {show.confirm ? EyeOff : Eye}
-                  </button>
-                </div>
-                {mismatch && (
-                  <div style={{ color:"#FF3B30", marginTop:8, fontSize:13 }}>
-                    New password and confirm password do not match.
-                  </div>
-                )}
-              </label>
-
-              <div>
-                <button className="btn btn-primary" type="submit" disabled={pwdBusy || invalidPwd}>
-                  {pwdBusy ? "Updating..." : "Update password"}
-                </button>
-              </div>
-            </form>
-          </div>
-        </section>
+            </div>
+          </section>
+        </div>
       </main>
     </div>
   );

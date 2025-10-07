@@ -1,4 +1,3 @@
-// src/components/admin.components/admin.login.form.jsx
 import { useState } from "react";
 import "../../assets/admin.assets/admin.login.css";
 import { adminLogin } from "../../apis/admin.apis/admin.login.api";
@@ -17,41 +16,57 @@ export default function AdminLoginForm() {
     !form.password ? "Password is required" :
     form.password.length < 6 ? "Password must be at least 6 characters" : "";
 
-  async function onSubmit(e) {
-    e.preventDefault();
-    setErr("");
-    if (emailErr || pwdErr) return;
+  // In admin.login.form.jsx - Update the onSubmit function:
+async function onSubmit(e) {
+  e.preventDefault();
+  setErr("");
+  if (emailErr || pwdErr) return;
 
-    try {
-      setBusy(true);
-
-      const { ok, admin } = await adminLogin({
-        email: form.email,
-        password: form.password,
-      });
-      if (!ok) throw new Error("Login failed");
-
-      localStorage.setItem("nexa_admin_profile", JSON.stringify(admin));
+  try {
+    setBusy(true);
+    console.log('Attempting login with:', form.email);
+    
+    const result = await adminLogin({
+      email: form.email,
+      password: form.password,
+    });
+    
+    console.log('Login successful:', result);
+    
+    // The response structure from your backend doesn't have "ok" property
+    // It directly returns { token, admin } or throws error
+    
+    // Store both admin profile AND token
+    if (result.admin && result.token) {
+      localStorage.setItem("nexa_admin_profile", JSON.stringify(result.admin));
+      localStorage.setItem("nexa_admin_token", result.token);
+      
+      // Redirect to dashboard
       window.location.href = "/v1/admin/dashboard";
-    } catch (e) {
-      const msg = e?.response?.data?.message || e?.message || "Login failed";
-      setErr(msg);
-    } finally {
-      setBusy(false);
+    } else {
+      throw new Error("Invalid response from server");
     }
+    
+  } catch (e) {
+    console.error('Login error details:', e);
+    const msg = e?.response?.data?.message || e?.message || "Login failed";
+    setErr(msg);
+  } finally {
+    setBusy(false);
   }
+}
 
   return (
     <div className="login-form">
       <form onSubmit={onSubmit} noValidate>
         {/* Email */}
         <div className="form-group">
-          <label className="form-label" htmlFor="email">Admin Email</label>
+          <label className="form-label" htmlFor="email">Admin e-mail *</label>
           <input
             id="email"
             type="email"
             className={`form-input ${emailErr ? "error" : ""}`}
-            placeholder="Enter your admin email"
+            placeholder="Enter your email address"
             value={form.email}
             onChange={(e)=>setForm({...form, email:e.target.value})}
             required
@@ -61,7 +76,7 @@ export default function AdminLoginForm() {
 
         {/* Password */}
         <div className="form-group">
-          <label className="form-label" htmlFor="password">Password</label>
+          <label className="form-label" htmlFor="password">Password *</label>
           <div className="password-wrapper">
             <input
               id="password"
@@ -110,24 +125,14 @@ export default function AdminLoginForm() {
 
         {/* Submit */}
         <button className="login-button" type="submit" disabled={busy || emailErr || pwdErr}>
-          <span>{busy ? "Signing in..." : "Sign In"}</span>
+          <span>{busy ? "Signing in..." : "Sign in"}</span>
           {busy && <div className="loading-spinner" />}
         </button>
 
-        {err && <div className="error-message" style={{marginTop:"0.75rem"}}>{err}</div>}
+        {err && <div className="error-message form-error">{err}</div>}
 
-        <div className="security-notice" style={{marginTop:"1rem"}}>
-          <p className="security-title">Secure Access</p>
-          <p className="security-text">
-            Restricted to authorized administrators. All login attempts are logged and monitored.
-          </p>
-        </div>
+        
       </form>
-
-      <div className="footer-text">
-        <p>Having trouble accessing your account?</p>
-        <p>Contact system administrator for assistance.</p>
-      </div>
     </div>
   );
 }

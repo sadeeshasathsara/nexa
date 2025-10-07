@@ -17,6 +17,7 @@ import { requireFields } from '../../middlewares/admin.middlewares/validate.midd
 
 const router = express.Router();
 
+router.use('/admin', AdminRoutes);
 router.use('/v1/admin', AdminRoutes);
 router.use('/v1/donor', checkAuth, checkRoleAccess, DonorRoutes);
 router.use('/v1/institution', checkAuth, checkRoleAccess, InstuitutionRoutes);

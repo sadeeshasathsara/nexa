@@ -1,59 +1,66 @@
-// src/components/admin.components/admin.sidebar.jsx
-import { NavLink, useNavigate } from "react-router-dom";
-import logo from "../../assets/global.assets/logo1.png";
+import { useState, useEffect } from "react";
+import "../../assets/admin.assets/admin.header.css";
 
-export default function AdminSidebar() {
-  const navigate = useNavigate();
+export default function AdminHeader() {
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [profile, setProfile] = useState(null);
 
-  const onLogout = async () => {
-    const API = import.meta.env.VITE_API_HOST || "http://localhost:5000";
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    // Load admin profile
     try {
-      await fetch(`${API}/api/v1/admin/auth/logout`, {
-        method: "POST",
-        credentials: "include",
-      });
-    } catch {}
-    try {
-      localStorage.removeItem("nexa_admin_profile");
-      sessionStorage.clear();
-    } catch {}
-    navigate("/v1/admin/login", { replace: true });
-  };
+      const adminProfile = localStorage.getItem("nexa_admin_profile");
+      if (adminProfile) {
+        setProfile(JSON.parse(adminProfile));
+      }
+    } catch {
+      // Handle error silently
+    }
 
-  const linkClass = ({ isActive }) => `nav-link ${isActive ? "active" : ""}`;
+    return () => clearInterval(timer);
+  }, []);
 
   return (
-    <aside className="sidebar">
-      <div className="sidebar-inner">
-        <div className="logo-wrap">
-          <img src={logo} alt="Nexa logo" className="logo-img" />
-          <div className="logo-text">Nexa Admin</div>
+    <header className="admin-header">
+      <div className="header-left">
+        <div className="search-bar-container">
+          <input 
+            type="text" 
+            placeholder="Search..." 
+            className="search-bar"
+          />
+          <i className="bx bx-search search-icon"></i>
         </div>
-        <div className="sidebar-title">Admin Dashboard</div>
-
-        <nav className="nav-list">
-          <NavLink to="/v1/admin/dashboard" className={linkClass} end>
-            <i className="bx bx-bar-chart-alt"></i>
-            <span>Dashboard</span>
-          </NavLink>
-
-          <NavLink to="/v1/admin/dashboard" className={linkClass}>
-            <i className="bx bx-bar-chart-alt-2"></i>
-            <span>Reports</span>
-          </NavLink>
-
-          <NavLink to="/v1/admin/settings" className={linkClass}>
-            <i className="bx bx-cog"></i>
-            <span>Settings</span>
-          </NavLink>
-        </nav>
-
-        <div className="sidebar-spacer" />
-        <button type="button" className="nav-link logout" onClick={onLogout}>
-          <i className="bx bx-log-out"></i>
-          <span>Logout</span>
-        </button>
       </div>
-    </aside>
+      
+      <div className="header-right">
+        <div className="time-display">
+          {currentTime.toLocaleTimeString('en-US', { 
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: true 
+          })}
+        </div>
+        
+        <div className="notifications">
+          <button className="icon-btn">
+            <i className="bx bx-bell"></i>
+          </button>
+        </div>
+        
+        <div className="admin-profile">
+          <div className="profile-avatar">
+            {profile?.name?.[0]?.toUpperCase() || 'A'}
+          </div>
+          <div className="profile-info">
+            <div className="profile-name">{profile?.name || 'Admin User'}</div>
+            <div className="profile-role">Administrator</div>
+          </div>
+        </div>
+      </div>
+    </header>
   );
 }

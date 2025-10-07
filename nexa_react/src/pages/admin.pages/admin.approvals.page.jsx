@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import "../../assets/admin.assets/admin.dashboard.css";
+import "../../assets/admin.assets/admin.approvals.css";
 import AdminHeader from "../../components/admin.components/admin.header";
 import AdminSidebar from "../../components/admin.components/admin.sidebar";
 import { getPending, decideByEmail, getApproved } from "../../apis/admin.apis/admin.approvals.api";
@@ -7,19 +8,26 @@ import { getPending, decideByEmail, getApproved } from "../../apis/admin.apis/ad
 function niceName(it) {
   return it?.name || it?.fullName || it?.institutionName || "(no name)";
 }
+
 function niceDate(s) {
   if (!s) return "-";
   const d = new Date(s);
-  return isNaN(d.getTime()) ? "-" : d.toLocaleString();
+  return isNaN(d.getTime()) ? "-" : d.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
 }
 
 export default function AdminApprovalsPage() {
   const [type, setType] = useState("tutor"); // "tutor" | "institution"
-  //Pending
+  // Pending
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
-  //Approved
+  // Approved
   const [approved, setApproved] = useState([]);
   const [loadingApproved, setLoadingApproved] = useState(false);
   const [errApproved, setErrApproved] = useState("");
@@ -40,10 +48,9 @@ export default function AdminApprovalsPage() {
   }
 
   async function loadApproved(){
-    setApproved(" ");
+    setErrApproved("");
     setLoadingApproved(true);
     try {
-      // Pass no limit to get full list, or pass a number e.g., 20 if your API supports it
       const data = await getApproved(type);
       setApproved(data || []);
     } catch (e) {
@@ -66,18 +73,19 @@ export default function AdminApprovalsPage() {
       let reason;
       if (action === "reject") {
         reason = window.prompt("Optional: Provide a reason for rejection (or leave empty)", "");
+        if (reason === null) return; // User cancelled
       }
       await decideByEmail({ type, email, action, reason });
-      //Update list locally
+      // Update list locally
       setItems((prev) =>
         prev.filter((x) => (x.email || "").toLowerCase() !== (email || "").toLowerCase())
       );
-      //if Approved, refresh and show in the approved list
+      // If Approved, refresh and show in the approved list
       if (action === "approve"){
         try {
           await loadApproved();
-        }catch {
-          //already updated the list
+        } catch {
+          // already updated the list
         }
       }
 
@@ -93,162 +101,234 @@ export default function AdminApprovalsPage() {
   const approvedEmpty = !loadingApproved && approved.length === 0;
 
   return (
-    <div className="admin-shell">
+    <div className="admin-dashboard">
       <AdminHeader />
       <AdminSidebar />
 
-      {/* Main content area */}
-      <main className="main">
-        <h1 className="page-title">Approvals</h1>
-        <p className="page-sub">
-          Approve or reject pending {type === "tutor" ? "tutor" : "institution"} accounts.
-        </p>
+      <main className="dashboard-main">
+        {/* Header Section */}
+        <div className="dashboard-header">
+          <div className="header-content">
+            <h1 className="welcome-title">Account Approvals</h1>
+            <p className="welcome-subtitle">
+              Review and manage pending {type === "tutor" ? "tutor" : "institution"} account requests
+            </p>
+          </div>
+          <div className="header-actions">
+            <div className="pending-badge">
+              <span className="badge-count">{items.length}</span>
+              Pending Requests
+            </div>
+          </div>
+        </div>
 
-        {/* Type Switch as buttons using existing .btn class */}
-        <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
+        {/* Type Switch */}
+        <div className="approvals-type-switch">
           <button
-            className="btn"
-            style={{
-              borderColor: type === "tutor" ? "var(--blue)" : "var(--line)",
-              color: type === "tutor" ? "var(--blue)" : "inherit",
-            }}
+            className={`type-btn ${type === "tutor" ? "active" : ""}`}
             onClick={() => setType("tutor")}
           >
-            Tutors
+            <i className="bx bx-user"></i>
+            Tutor Requests
           </button>
           <button
-            className="btn"
-            style={{
-              borderColor: type === "institution" ? "var(--blue)" : "var(--line)",
-              color: type === "institution" ? "var(--blue)" : "inherit",
-            }}
+            className={`type-btn ${type === "institution" ? "active" : ""}`}
             onClick={() => setType("institution")}
           >
-            Institutions
+            <i className="bx bx-building"></i>
+            Institution Requests
           </button>
         </div>
 
-        {/* Error / loading / empty */}
-        {err && <div className="card" style={{ padding: 16, marginBottom: 16 }}>{err}</div>}
-        {loading && <div className="card" style={{ padding: 16, marginBottom: 16 }}>Loading…</div>}
-        {empty && !loading && (
-          <div className="card" style={{ padding: 16, marginBottom: 16 }}>
-            No pending {type}s 🎉
+        {/* Error States */}
+        {err && (
+          <div className="error-card">
+            <i className="bx bx-error-circle"></i>
+            {err}
           </div>
         )}
 
-        {/* Table using your table classes */}
-        {!loading && items.length > 0 && (
-          <section className="table-wrap">
-            <div className="table-head">
-              <h3 className="card-title">
-                Pending {type === "tutor" ? "Tutors" : "Institutions"}
-              </h3>
-              <div className="table-controls" />
+        {errApproved && (
+          <div className="error-card">
+            <i className="bx bx-error-circle"></i>
+            {errApproved}
+          </div>
+        )}
+
+        {/* Loading States */}
+        {loading && (
+          <div className="loading-card">
+            <div className="loading-spinner"></div>
+            Loading pending requests...
+          </div>
+        )}
+
+        {loadingApproved && (
+          <div className="loading-card">
+            <div className="loading-spinner"></div>
+            Loading approved list...
+          </div>
+        )}
+
+        <div className="approvals-content">
+          {/* Pending Section */}
+          <section className="approvals-section">
+            <div className="section-header">
+              <h2 className="section-title">
+                Pending Approval
+                {items.length > 0 && <span className="count-badge">{items.length}</span>}
+              </h2>
+              <p className="section-subtitle">
+                Review and take action on new account requests
+              </p>
             </div>
 
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Name / Email</th>
-                  <th>Status</th>
-                  <th>Applied</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
+            {empty && !loading && (
+              <div className="empty-state">
+                <i className="bx bx-party"></i>
+                <h3>No Pending Requests</h3>
+                <p>All {type} requests have been processed! 🎉</p>
+              </div>
+            )}
+
+            {!loading && items.length > 0 && (
+              <div className="requests-grid">
                 {items.map((it, i) => (
-                  <tr key={(it._id || it.id || i).toString()}>
-                    <td>{i + 1}</td>
-                    <td>
-                      <div style={{ fontWeight: 600 }}>{niceName(it)}</div>
-                      <div style={{ color: "var(--muted)", fontSize: 12 }}>
-                        {it.email || "-"}
+                  <div key={(it._id || it.id || i).toString()} className="request-card">
+                    <div className="request-header">
+                      <div className="request-avatar">
+                        {type === "tutor" ? "T" : "I"}
                       </div>
-                    </td>
-                    <td>
-                      <span className={`status ${it.status || "pending"}`}>
-                        {(it.status || "pending").replace(/^\w/, (c) => c.toUpperCase())}
-                      </span>
-                    </td>
-                    <td>{niceDate(it.createdAt)}</td>
-                    <td>
-                      <div style={{ display: "flex", gap: 8 }}>
-                        <button
-                          className="btn btn-approve"
-                          onClick={() => onDecision(it.email, "approve")}
-                        >
-                          Approve
-                        </button>
-                        <button
-                          className="btn btn-reject"
-                          onClick={() => onDecision(it.email, "reject")}
-                        >
-                          Reject
-                        </button>
+                      <div className="request-info">
+                        <h3 className="request-name">{niceName(it)}</h3>
+                        <p className="request-email">{it.email || "-"}</p>
                       </div>
-                    </td>
-                  </tr>
+                      <div className="request-status pending">
+                        Pending Review
+                      </div>
+                    </div>
+
+                    <div className="request-details">
+                      <div className="detail-item">
+                        <span className="detail-label">Applied:</span>
+                        <span className="detail-value">{niceDate(it.createdAt)}</span>
+                      </div>
+                      <div className="detail-item">
+                        <span className="detail-label">Type:</span>
+                        <span className="detail-value capitalize">{type}</span>
+                      </div>
+                      {it.subject && (
+                        <div className="detail-item">
+                          <span className="detail-label">Subject:</span>
+                          <span className="detail-value">{it.subject}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="request-actions">
+                      <button
+                        className="btn-approve"
+                        onClick={() => onDecision(it.email, "approve")}
+                        disabled={actingEmail === it.email}
+                      >
+                        {actingEmail === it.email ? (
+                          <div className="loading-spinner small"></div>
+                        ) : (
+                          <>
+                            <i className="bx bx-check"></i>
+                            Approve
+                          </>
+                        )}
+                      </button>
+                      <button
+                        className="btn-reject"
+                        onClick={() => onDecision(it.email, "reject")}
+                        disabled={actingEmail === it.email}
+                      >
+                        {actingEmail === it.email ? (
+                          <div className="loading-spinner small"></div>
+                        ) : (
+                          <>
+                            <i className="bx bx-x"></i>
+                            Reject
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
                 ))}
-              </tbody>
-            </table>
-          </section>   
-        )}
+              </div>
+            )}
+          </section>
 
-        {/* Approved Section */}
-        {errApproved && <div className="card" style={{ padding: 16, marginBottom: 16 }}>{errApproved}</div>}
-        {loadingApproved && <div className="card" style={{ padding: 16, marginBottom: 16 }}>Loading approved…</div>}
-        {approvedEmpty && !loadingApproved && (
-          <div className="card" style={{ padding: 16, marginBottom: 16 }}>
-            No approved {type}s found.
-          </div>
-        )}
-
-        {!loadingApproved && approved.length > 0 && (
-          <section className="table-wrap">
-            <div className="table-head">
-              <h3 className="card-title">
-                Approved {type === "tutor" ? "Tutors" : "Institutions"}
-              </h3>
-              <div className="table-controls" />
+          {/* Approved Section */}
+          <section className="approvals-section">
+            <div className="section-header">
+              <h2 className="section-title">
+                Approved Accounts
+                {approved.length > 0 && <span className="count-badge approved">{approved.length}</span>}
+              </h2>
+              <p className="section-subtitle">
+                Previously approved {type} accounts
+              </p>
             </div>
 
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>ID</th>
-                  <th>Name / Email</th>
-                  <th>Status</th>
-                  <th>Approved On</th>
-                </tr>
-              </thead>
-              <tbody>
-                {approved.map((it, i) => (
-                  <tr key={(it._id || it.id || `a-${i}`).toString()}>
-                    <td>{i + 1}</td>
-                    <td style={{ fontFamily: "monospace" }}>{(it._id || it.id || "-").toString()}</td>
-                    <td>
-                      <div style={{ fontWeight: 600 }}>{niceName(it)}</div>
-                      <div style={{ color: "var(--muted)", fontSize: 12 }}>
-                        {it.email || "-"}
-                      </div>
-                    </td>
-                    <td>
-                      <span className={`status ${it.status || "active"}`}>
-                        {(it.status || "active").replace(/^\w/, (c) => c.toUpperCase())}
-                      </span>
-                    </td>
-                    <td>{niceDate(it.approvedAt)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            </section>
-        )}
+            {approvedEmpty && !loadingApproved && (
+              <div className="empty-state">
+                <i className="bx bx-user-check"></i>
+                <h3>No Approved Accounts</h3>
+                <p>No {type} accounts have been approved yet.</p>
+              </div>
+            )}
+
+            {!loadingApproved && approved.length > 0 && (
+              <div className="approved-table-container">
+                <table className="approved-table">
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Status</th>
+                      <th>Approved Date</th>
+                      <th>ID</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {approved.map((it, i) => (
+                      <tr key={(it._id || it.id || `a-${i}`).toString()}>
+                        <td>
+                          <div className="user-cell">
+                            <div className="user-avatar">
+                              {type === "tutor" ? "T" : "I"}
+                            </div>
+                            <div className="user-info">
+                              <div className="user-name">{niceName(it)}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td>
+                          <div className="email-cell">{it.email || "-"}</div>
+                        </td>
+                        <td>
+                          <span className="status-badge active">
+                            Active
+                          </span>
+                        </td>
+                        <td>
+                          <div className="date-cell">{niceDate(it.approvedAt)}</div>
+                        </td>
+                        <td>
+                          <div className="id-cell">{(it._id || it.id || "-").toString().slice(-8)}</div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </section>
+        </div>
       </main>
     </div>
-    
   );
 }
