@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import "../../assets/admin.assets/admin.dashboard.css";
+import "../../assets/admin.assets/admin.approvals.css";
 import AdminHeader from "../../components/admin.components/admin.header";
 import AdminSidebar from "../../components/admin.components/admin.sidebar";
 import { getPending, decideByEmail, getApproved } from "../../apis/admin.apis/admin.approvals.api";
@@ -7,6 +7,7 @@ import { getPending, decideByEmail, getApproved } from "../../apis/admin.apis/ad
 function niceName(it) {
   return it?.name || it?.fullName || it?.institutionName || "(no name)";
 }
+
 function niceDate(s) {
   if (!s) return "-";
   const d = new Date(s);
@@ -14,17 +15,14 @@ function niceDate(s) {
 }
 
 export default function AdminApprovalsPage() {
-  const [type, setType] = useState("tutor"); // "tutor" | "institution"
-  //Pending
+  const [type, setType] = useState("tutor");
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
-  //Approved
   const [approved, setApproved] = useState([]);
   const [loadingApproved, setLoadingApproved] = useState(false);
   const [errApproved, setErrApproved] = useState("");
-
-  const [actingEmail, setActingEmail] = useState(null); // avoid double actions
+  const [actingEmail, setActingEmail] = useState(null);
 
   async function loadPending() {
     setErr("");
@@ -39,11 +37,10 @@ export default function AdminApprovalsPage() {
     }
   }
 
-  async function loadApproved(){
-    setApproved(" ");
+  async function loadApproved() {
+    setErrApproved("");
     setLoadingApproved(true);
     try {
-      // Pass no limit to get full list, or pass a number e.g., 20 if your API supports it
       const data = await getApproved(type);
       setApproved(data || []);
     } catch (e) {
@@ -68,23 +65,20 @@ export default function AdminApprovalsPage() {
         reason = window.prompt("Optional: Provide a reason for rejection (or leave empty)", "");
       }
       await decideByEmail({ type, email, action, reason });
-      //Update list locally
       setItems((prev) =>
         prev.filter((x) => (x.email || "").toLowerCase() !== (email || "").toLowerCase())
       );
-      //if Approved, refresh and show in the approved list
-      if (action === "approve"){
+      if (action === "approve") {
         try {
           await loadApproved();
-        }catch {
-          //already updated the list
+        } catch {
+          // already updated the list
         }
       }
-
       alert(`${action === "approve" ? "Approved" : "Rejected"}: ${email}`);
     } catch (e) {
       alert(e?.response?.data?.message || "Action failed");
-    } finally{
+    } finally {
       setActingEmail(null);
     }
   }
@@ -93,162 +87,237 @@ export default function AdminApprovalsPage() {
   const approvedEmpty = !loadingApproved && approved.length === 0;
 
   return (
-    <div className="admin-shell">
+    <div className="admin-layout">
       <AdminHeader />
       <AdminSidebar />
-
-      {/* Main content area */}
-      <main className="main">
-        <h1 className="page-title">Approvals</h1>
-        <p className="page-sub">
-          Approve or reject pending {type === "tutor" ? "tutor" : "institution"} accounts.
-        </p>
-
-        {/* Type Switch as buttons using existing .btn class */}
-        <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
-          <button
-            className="btn"
-            style={{
-              borderColor: type === "tutor" ? "var(--blue)" : "var(--line)",
-              color: type === "tutor" ? "var(--blue)" : "inherit",
-            }}
-            onClick={() => setType("tutor")}
-          >
-            Tutors
-          </button>
-          <button
-            className="btn"
-            style={{
-              borderColor: type === "institution" ? "var(--blue)" : "var(--line)",
-              color: type === "institution" ? "var(--blue)" : "inherit",
-            }}
-            onClick={() => setType("institution")}
-          >
-            Institutions
-          </button>
+      
+      <main className="admin-main-content">
+        {/* Header Section */}
+        <div className="content-header">
+          <div className="header-info">
+            <h1 className="page-title">Tutor Approvals</h1>
+            <p className="page-subtitle">
+              Review and manage pending tutor applications
+            </p>
+          </div>
+          <div className="header-stats">
+            <div className="stat-item">
+              <div className="stat-value">{items.length}</div>
+              <div className="stat-label">Pending</div>
+            </div>
+            <div className="stat-item">
+              <div className="stat-value">{approved.length}</div>
+              <div className="stat-label">Approved</div>
+            </div>
+          </div>
         </div>
 
-        {/* Error / loading / empty */}
-        {err && <div className="card" style={{ padding: 16, marginBottom: 16 }}>{err}</div>}
-        {loading && <div className="card" style={{ padding: 16, marginBottom: 16 }}>Loading…</div>}
-        {empty && !loading && (
-          <div className="card" style={{ padding: 16, marginBottom: 16 }}>
-            No pending {type}s 🎉
-          </div>
-        )}
-
-        {/* Table using your table classes */}
-        {!loading && items.length > 0 && (
-          <section className="table-wrap">
-            <div className="table-head">
-              <h3 className="card-title">
-                Pending {type === "tutor" ? "Tutors" : "Institutions"}
-              </h3>
-              <div className="table-controls" />
+        <div className="content-body">
+          {/* Error / loading / empty */}
+          {err && (
+            <div className="alert alert-error">
+              <i className="bx bx-error-circle"></i>
+              <span>{err}</span>
             </div>
-
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Name / Email</th>
-                  <th>Status</th>
-                  <th>Applied</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {items.map((it, i) => (
-                  <tr key={(it._id || it.id || i).toString()}>
-                    <td>{i + 1}</td>
-                    <td>
-                      <div style={{ fontWeight: 600 }}>{niceName(it)}</div>
-                      <div style={{ color: "var(--muted)", fontSize: 12 }}>
-                        {it.email || "-"}
-                      </div>
-                    </td>
-                    <td>
-                      <span className={`status ${it.status || "pending"}`}>
-                        {(it.status || "pending").replace(/^\w/, (c) => c.toUpperCase())}
-                      </span>
-                    </td>
-                    <td>{niceDate(it.createdAt)}</td>
-                    <td>
-                      <div style={{ display: "flex", gap: 8 }}>
-                        <button
-                          className="btn btn-approve"
-                          onClick={() => onDecision(it.email, "approve")}
-                        >
-                          Approve
-                        </button>
-                        <button
-                          className="btn btn-reject"
-                          onClick={() => onDecision(it.email, "reject")}
-                        >
-                          Reject
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </section>   
-        )}
-
-        {/* Approved Section */}
-        {errApproved && <div className="card" style={{ padding: 16, marginBottom: 16 }}>{errApproved}</div>}
-        {loadingApproved && <div className="card" style={{ padding: 16, marginBottom: 16 }}>Loading approved…</div>}
-        {approvedEmpty && !loadingApproved && (
-          <div className="card" style={{ padding: 16, marginBottom: 16 }}>
-            No approved {type}s found.
-          </div>
-        )}
-
-        {!loadingApproved && approved.length > 0 && (
-          <section className="table-wrap">
-            <div className="table-head">
-              <h3 className="card-title">
-                Approved {type === "tutor" ? "Tutors" : "Institutions"}
-              </h3>
-              <div className="table-controls" />
+          )}
+          
+          {loading && (
+            <div className="loading-card">
+              <i className="bx bx-loader-circle bx-spin"></i>
+              <span>Loading pending applications…</span>
             </div>
+          )}
+          
+          {empty && !loading && (
+            <div className="empty-state-card">
+              <i className="bx bx-party"></i>
+              <h3>No pending tutors</h3>
+              <p>All caught up! 🎉 No pending tutor applications at the moment.</p>
+            </div>
+          )}
 
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>ID</th>
-                  <th>Name / Email</th>
-                  <th>Status</th>
-                  <th>Approved On</th>
-                </tr>
-              </thead>
-              <tbody>
-                {approved.map((it, i) => (
-                  <tr key={(it._id || it.id || `a-${i}`).toString()}>
-                    <td>{i + 1}</td>
-                    <td style={{ fontFamily: "monospace" }}>{(it._id || it.id || "-").toString()}</td>
-                    <td>
-                      <div style={{ fontWeight: 600 }}>{niceName(it)}</div>
-                      <div style={{ color: "var(--muted)", fontSize: 12 }}>
-                        {it.email || "-"}
-                      </div>
-                    </td>
-                    <td>
-                      <span className={`status ${it.status || "active"}`}>
-                        {(it.status || "active").replace(/^\w/, (c) => c.toUpperCase())}
-                      </span>
-                    </td>
-                    <td>{niceDate(it.approvedAt)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            </section>
-        )}
+          {/* Pending Table */}
+          {!loading && items.length > 0 && (
+            <div className="card">
+              <div className="card-header">
+                <h3 className="card-title">
+                  Pending Tutor Applications
+                </h3>
+                <div className="card-actions">
+                  <button 
+                    className="btn btn-secondary btn-sm"
+                    onClick={loadPending}
+                  >
+                    <i className="bx bx-refresh"></i>
+                    Refresh
+                  </button>
+                </div>
+              </div>
+
+              <div className="table-container">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Tutor Information</th>
+                      <th>Status</th>
+                      <th>Applied Date</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {items.map((it, i) => (
+                      <tr key={(it._id || it.id || i).toString()} className={actingEmail === it.email ? "row-disabled" : ""}>
+                        <td className="text-center">{i + 1}</td>
+                        <td>
+                          <div className="user-info">
+                            <div className="user-name">{niceName(it)}</div>
+                            <div className="user-email">{it.email || "-"}</div>
+                            {it.qualifications && (
+                              <div className="user-qualifications">
+                                {it.qualifications}
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                        <td>
+                          <span className={`status-badge status-${it.status || "pending"}`}>
+                            {(it.status || "pending").replace(/^\w/, (c) => c.toUpperCase())}
+                          </span>
+                        </td>
+                        <td>{niceDate(it.createdAt)}</td>
+                        <td>
+                          <div className="action-buttons">
+                            <button
+                              className="btn btn-success btn-sm"
+                              onClick={() => onDecision(it.email, "approve")}
+                              disabled={actingEmail === it.email}
+                            >
+                              {actingEmail === it.email ? (
+                                <>
+                                  <i className="bx bx-loader-circle bx-spin"></i>
+                                  Processing
+                                </>
+                              ) : (
+                                <>
+                                  <i className="bx bx-check"></i>
+                                  Approve
+                                </>
+                              )}
+                            </button>
+                            <button
+                              className="btn btn-danger btn-sm"
+                              onClick={() => onDecision(it.email, "reject")}
+                              disabled={actingEmail === it.email}
+                            >
+                              {actingEmail === it.email ? (
+                                <>
+                                  <i className="bx bx-loader-circle bx-spin"></i>
+                                  Processing
+                                </>
+                              ) : (
+                                <>
+                                  <i className="bx bx-x"></i>
+                                  Reject
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Approved Section */}
+          {errApproved && (
+            <div className="alert alert-warning">
+              <i className="bx bx-error-alt"></i>
+              <span>{errApproved}</span>
+            </div>
+          )}
+          
+          {loadingApproved && (
+            <div className="loading-card">
+              <i className="bx bx-loader-circle bx-spin"></i>
+              <span>Loading approved tutors…</span>
+            </div>
+          )}
+          
+          {approvedEmpty && !loadingApproved && (
+            <div className="empty-state-card">
+              <i className="bx bx-user-check"></i>
+              <h3>No approved tutors</h3>
+              <p>Approved tutors will appear here once you start approving applications.</p>
+            </div>
+          )}
+
+          {!loadingApproved && approved.length > 0 && (
+            <div className="card">
+              <div className="card-header">
+                <h3 className="card-title">
+                  Approved Tutors
+                </h3>
+                <div className="card-actions">
+                  <button 
+                    className="btn btn-secondary btn-sm"
+                    onClick={loadApproved}
+                  >
+                    <i className="bx bx-refresh"></i>
+                    Refresh
+                  </button>
+                </div>
+              </div>
+
+              <div className="table-container">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Tutor Information</th>
+                      <th>Status</th>
+                      <th>Approved Date</th>
+                      <th>ID</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {approved.map((it, i) => (
+                      <tr key={(it._id || it.id || `a-${i}`).toString()}>
+                        <td className="text-center">{i + 1}</td>
+                        <td>
+                          <div className="user-info">
+                            <div className="user-name">{niceName(it)}</div>
+                            <div className="user-email">{it.email || "-"}</div>
+                            {it.qualifications && (
+                              <div className="user-qualifications">
+                                {it.qualifications}
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                        <td>
+                          <span className={`status-badge status-${it.status || "active"}`}>
+                            {(it.status || "active").replace(/^\w/, (c) => c.toUpperCase())}
+                          </span>
+                        </td>
+                        <td>{niceDate(it.approvedAt)}</td>
+                        <td>
+                          <code className="id-badge">
+                            {(it._id || it.id || "-").toString().slice(-8)}
+                          </code>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
       </main>
     </div>
-    
   );
 }

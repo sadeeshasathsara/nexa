@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "../../assets/admin.assets/admin.dashboard.css";
+import "../../assets/admin.assets/admin.settings.css";
 import AdminHeader from "../../components/admin.components/admin.header";
 import AdminSidebar from "../../components/admin.components/admin.sidebar";
 import { registerNewAdmin } from "../../apis/admin.apis/admin.profile.api";

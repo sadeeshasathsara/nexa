@@ -5,6 +5,8 @@ import AdminDashboardPage from "../../pages/admin.pages/admin.dashboard.page.jsx
 import AdminSettingsPage from "../../pages/admin.pages/admin.settings.page.jsx";
 import AdminRegisterPage from "../../pages/admin.pages/admin.register.page.jsx";
 import AdminApprovalsPage from "../../pages/admin.pages/admin.approvals.page.jsx";
+import Notifications from "../../pages/admin.pages/admin.Notifications.jsx";
+import Messages from "../../pages/admin.pages/admin.Messages.jsx";
 
 
 export default function AdminRoutes() {
@@ -18,6 +20,8 @@ export default function AdminRoutes() {
         <Route path="settings" element={<AdminSettingsPage/>} />
         <Route path="register" element={<AdminRegisterPage/>} />
         <Route path="approvals" element={<AdminApprovalsPage/>} />
+        <Route path="notifications" element={<Notifications/>} />
+        <Route path="messages" element={<Messages/>} />
       </Route>
     </Routes>
   );
