@@ -68,7 +68,6 @@ export default function AdminSidebar() {
               <NavLink to="/v1/admin/approvals" className={linkClass}>
                 <i className="bx bx-check-shield"></i>
                 <span className="nav-text">Approvals</span>
-                <span className="nav-badge">5</span>
               </NavLink>
 
               <NavLink to="/v1/admin/settings" className={linkClass}>
