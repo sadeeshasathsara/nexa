@@ -2,7 +2,7 @@ import React from "react";
 import { Route, Routes } from "react-router-dom";
 import TutorPage from "../../pages/tutor.pages/tutor.page";
 import TutorProfile from "../../pages/tutor.pages/tutor.profile.page";
-import TutorDashboard from "../../pages/tutor.pages/tutor.dashboard.page";
+import TutorDashboard from "../../components/tutor.components/dashboard.components/TutorDashboard";
 import SessionScheduling from "../../pages/tutor.pages/tutor.session.sheduling";
 import MyCourses from "../../pages/tutor.pages/tutor.mycourses";
 
@@ -11,8 +11,8 @@ function TutorRoutes() {
     <Routes>
       {/* Group 1: Routes WITH top navbar (using TutorPage as layout) */}
       <Route path="/" element={<TutorPage />}>
-        <Route index element={<TutorDashboard />} />
-        <Route path="courses" element={<MyCourses />} />
+        <Route index path="dashboard" element={<TutorDashboard />} />
+        {/* <Route  element={<MyCourses />} /> */}
         <Route path="schedule" element={<SessionScheduling />} />
         <Route path="assignments" element={<div>Assignments Page</div>} />
         <Route path="students" element={<div>Students Page</div>} />

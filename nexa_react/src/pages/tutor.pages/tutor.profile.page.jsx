@@ -1,5 +1,6 @@
 // pages/tutor.pages/tutor.profile.page.js
 import React, { useState, useEffect } from "react";
+import { tutorApi } from "../../apis/tutor.apis/profile.api";
 import { useNavigate } from "react-router-dom";
 import {
   User,
@@ -35,7 +36,7 @@ const CompactProfileCard = ({
   saving,
 }) => {
   return (
-    <div className="bg-gradient-to-br from-[#043345] via-[#0D9AAC] to-[#00B6C7] rounded-xl text-white h-fit sticky top-8">
+    <div className="bg-gradient-to-br from-[#043345] via-[#0D9AAC] to-[#00B6C7] rounded-xl text-white h-fit fixed top-24 left-8 w-72 shadow-lg">
       {/* Header with Edit Button */}
       <div className="flex items-center justify-between p-4 border-b border-white/20">
         <h2 className="text-lg font-semibold">Profile</h2>
@@ -86,7 +87,7 @@ const CompactProfileCard = ({
                 {tutorData.firstName} {tutorData.lastName}
               </h3>
               <p className="text-white/90 text-sm">
-                {tutorData.education.certification}
+                {tutorData.education?.certification || "Tutor"}
               </p>
               <p className="text-white/80 text-xs">{tutorData.email}</p>
 
@@ -101,7 +102,7 @@ const CompactProfileCard = ({
                 </div>
                 <div className="flex items-center justify-center">
                   <School className="w-3 h-3 mr-2" />
-                  <span>{tutorData.schoolName}</span>
+                  <span>{tutorData.schoolName || "Not specified"}</span>
                 </div>
               </div>
             </>
@@ -165,7 +166,7 @@ const CompactProfileCard = ({
   );
 };
 
-// Section Components
+// Section Components (Updated to handle API response structure)
 const AboutSection = ({
   tutorData,
   isEditing,
@@ -215,7 +216,9 @@ const AboutSection = ({
     </div>
 
     {!isEditing ? (
-      <p className="text-gray-600 leading-relaxed">{tutorData.about}</p>
+      <p className="text-gray-600 leading-relaxed whitespace-pre-wrap">
+        {tutorData.about || "No about information provided."}
+      </p>
     ) : (
       <textarea
         value={editData.about || ""}
@@ -280,21 +283,27 @@ const EducationSection = ({
       <div className="space-y-3">
         <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
           <span className="font-medium">Degree:</span>
-          <span className="text-gray-600">{tutorData.education.degree}</span>
+          <span className="text-gray-600">
+            {tutorData.education?.degree || "Not specified"}
+          </span>
         </div>
         <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
           <span className="font-medium">Education Level:</span>
-          <span className="text-gray-600">{tutorData.education.level}</span>
+          <span className="text-gray-600">
+            {tutorData.education?.level || "Not specified"}
+          </span>
         </div>
         <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
           <span className="font-medium">Certification:</span>
           <span className="text-gray-600">
-            {tutorData.education.certification}
+            {tutorData.education?.certification || "Not specified"}
           </span>
         </div>
         <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
           <span className="font-medium">Workplace:</span>
-          <span className="text-gray-600">{tutorData.education.workplace}</span>
+          <span className="text-gray-600">
+            {tutorData.education?.workplace || "Not specified"}
+          </span>
         </div>
       </div>
     ) : (
@@ -407,11 +416,15 @@ const ExperienceSection = ({
       <div className="space-y-3">
         <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
           <span className="font-medium">Status:</span>
-          <span className="text-gray-600">{tutorData.experience.status}</span>
+          <span className="text-gray-600">
+            {tutorData.experience?.status || "Not specified"}
+          </span>
         </div>
         <div className="p-3 bg-gray-50 rounded-lg">
           <span className="font-medium block mb-2">Description:</span>
-          <p className="text-gray-600">{tutorData.experience.description}</p>
+          <p className="text-gray-600">
+            {tutorData.experience?.description || "No description provided."}
+          </p>
         </div>
       </div>
     ) : (
@@ -498,14 +511,18 @@ const SubjectsSection = ({
 
     {!isEditing ? (
       <div className="flex flex-wrap gap-2">
-        {tutorData.subjects.map((subject, index) => (
-          <span
-            key={index}
-            className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium"
-          >
-            {subject}
-          </span>
-        ))}
+        {tutorData.subjects && tutorData.subjects.length > 0 ? (
+          tutorData.subjects.map((subject, index) => (
+            <span
+              key={index}
+              className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium"
+            >
+              {subject}
+            </span>
+          ))
+        ) : (
+          <p className="text-gray-500">No subjects added yet.</p>
+        )}
       </div>
     ) : (
       <div className="space-y-3">
@@ -611,15 +628,19 @@ const LanguagesSection = ({
 
     {!isEditing ? (
       <div className="space-y-3">
-        {tutorData.languages.map((lang, index) => (
-          <div
-            key={index}
-            className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-          >
-            <span className="font-medium">{lang.language}</span>
-            <span className="text-gray-600">{lang.level}</span>
-          </div>
-        ))}
+        {tutorData.languages && tutorData.languages.length > 0 ? (
+          tutorData.languages.map((lang, index) => (
+            <div
+              key={lang._id || index}
+              className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+            >
+              <span className="font-medium">{lang.language}</span>
+              <span className="text-gray-600">{lang.level}</span>
+            </div>
+          ))
+        ) : (
+          <p className="text-gray-500">No languages added yet.</p>
+        )}
       </div>
     ) : (
       <div className="space-y-3">
@@ -734,17 +755,21 @@ const AvailabilitySection = ({
 
     {!isEditing ? (
       <div className="space-y-3">
-        {tutorData.availability.map((slot, index) => (
-          <div
-            key={index}
-            className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-          >
-            <span className="font-medium">{slot.day}</span>
-            <span className="text-gray-600">
-              {slot.startTime} - {slot.endTime}
-            </span>
-          </div>
-        ))}
+        {tutorData.availability && tutorData.availability.length > 0 ? (
+          tutorData.availability.map((slot, index) => (
+            <div
+              key={slot._id || index}
+              className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+            >
+              <span className="font-medium">{slot.day}</span>
+              <span className="text-gray-600">
+                {slot.startTime} - {slot.endTime}
+              </span>
+            </div>
+          ))
+        ) : (
+          <p className="text-gray-500">No availability set.</p>
+        )}
       </div>
     ) : (
       <div className="space-y-3">
@@ -877,15 +902,19 @@ const ResumeSection = ({
     </div>
 
     {!isEditing ? (
-      <a
-        href={tutorData.resumePortfolioLink}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-300"
-      >
-        <Github className="w-4 h-4 mr-2" />
-        View Portfolio
-      </a>
+      tutorData.resumePortfolioLink ? (
+        <a
+          href={tutorData.resumePortfolioLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-300"
+        >
+          <Github className="w-4 h-4 mr-2" />
+          View Portfolio
+        </a>
+      ) : (
+        <p className="text-gray-500">No portfolio link provided.</p>
+      )
     ) : (
       <input
         type="url"
@@ -995,38 +1024,31 @@ const MainContentCard = ({
 
 // Main Profile Page Component
 const TutorProfilePage = () => {
-  const [tutorData, setTutorData] = useState({
-    firstName: "Eric",
-    lastName: "Devon",
-    email: "ericdevon@example.com",
-    phoneNumber: "0785645398",
-    age: 22,
-    schoolName: "Kattuwa",
-    about:
-      "Passionate government school teacher specializing in mathematics education. Dedicated to helping students understand complex mathematical concepts through simplified teaching methods and personalized attention.",
-    education: {
-      degree: "High School Graduate",
-      level: "High School",
-      certification: "Government Certified Teacher",
-      workplace: "Currently teaching at Kattuwa School",
-    },
-    experience: {
-      status: "New to Online Tutoring",
-      description:
-        "Fresh start in online tutoring with government teaching background",
-    },
-    subjects: ["Math"],
-    languages: [{ language: "Urdu", level: "Fluent" }],
-    availability: [{ day: "Wednesday", startTime: "18:55", endTime: "20:55" }],
-    resumePortfolioLink: "https://github.com/Eric-Devon",
-  });
-
-  const [loading, setLoading] = useState(false);
+  const [tutorData, setTutorData] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [editingSection, setEditingSection] = useState(null);
   const [editData, setEditData] = useState({});
   const [saving, setSaving] = useState(false);
   const navigate = useNavigate();
+
+  // Fetch tutor profile data
+  useEffect(() => {
+    const fetchTutorProfile = async () => {
+      try {
+        setLoading(true);
+        const response = await tutorApi.getProfile();
+        setTutorData(response.data);
+      } catch (err) {
+        setError(err.message || "Failed to fetch tutor profile");
+        console.error("Error fetching tutor profile:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTutorProfile();
+  }, []);
 
   const handleEdit = (section) => {
     setEditingSection(section);
@@ -1038,15 +1060,30 @@ const TutorProfilePage = () => {
       setSaving(true);
       setError(null);
 
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Prepare data for API call (remove MongoDB _id fields if present)
+      const dataToUpdate = { ...editData };
 
-      // Update the tutor data with edited data
-      setTutorData(editData);
+      // Remove _id fields from nested arrays
+      if (dataToUpdate.languages) {
+        dataToUpdate.languages = dataToUpdate.languages.map(
+          ({ _id, ...lang }) => lang
+        );
+      }
+      if (dataToUpdate.availability) {
+        dataToUpdate.availability = dataToUpdate.availability.map(
+          ({ _id, ...slot }) => slot
+        );
+      }
+
+      // Call the update API
+      const response = await tutorApi.updateProfile(dataToUpdate);
+
+      // Update local state with the response data
+      setTutorData(response.data);
       setEditingSection(null);
       setEditData({});
     } catch (err) {
-      setError(err.message);
+      setError(err.message || "Failed to update profile");
       console.error("Error updating profile:", err);
     } finally {
       setSaving(false);
@@ -1057,6 +1094,48 @@ const TutorProfilePage = () => {
     setEditingSection(null);
     setEditData({});
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader className="w-8 h-8 animate-spin text-[#043345] mx-auto mb-4" />
+          <p className="text-gray-600">Loading your profile...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error && !tutorData) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center max-w-md">
+          <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-gray-900 mb-2">
+            Error Loading Profile
+          </h2>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-[#043345] text-white rounded-lg hover:bg-[#0D9AAC] transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!tutorData) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <AlertCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+          <p className="text-gray-600">No profile data found.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
