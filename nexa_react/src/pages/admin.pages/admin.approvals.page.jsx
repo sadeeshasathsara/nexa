@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
-import "../../assets/admin.assets/admin.dashboard.css";
+import "../../assets/admin.assets/admin.approvals.css";
 import AdminHeader from "../../components/admin.components/admin.header";
 import AdminSidebar from "../../components/admin.components/admin.sidebar";
-import { getPending, decideByEmail, getApproved } from "../../apis/admin.apis/admin.approvals.api";
+import { getPending, getApproved, decideTutor } from "../../apis/admin.apis/admin.approvals.api";
 
 function niceName(it) {
-  return it?.name || it?.fullName || it?.institutionName || "(no name)";
+  return `${it.firstName || ""} ${it.lastName || ""}`.trim() || "(no name)";
 }
+
 function niceDate(s) {
   if (!s) return "-";
   const d = new Date(s);
@@ -14,40 +15,35 @@ function niceDate(s) {
 }
 
 export default function AdminApprovalsPage() {
-  const [type, setType] = useState("tutor"); // "tutor" | "institution"
-  //Pending
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");
-  //Approved
   const [approved, setApproved] = useState([]);
   const [loadingApproved, setLoadingApproved] = useState(false);
   const [errApproved, setErrApproved] = useState("");
-
-  const [actingEmail, setActingEmail] = useState(null); // avoid double actions
+  const [actingId, setActingId] = useState(null);
 
   async function loadPending() {
     setErr("");
     setLoading(true);
     try {
-      const data = await getPending(type);
+      const data = await getPending();
       setItems(data);
     } catch (e) {
-      setErr(e?.response?.data?.message || "Failed to load pending list");
+      setErr(e.message || "Failed to load pending tutors");
     } finally {
       setLoading(false);
     }
   }
 
-  async function loadApproved(){
-    setApproved(" ");
+  async function loadApproved() {
+    setErrApproved("");
     setLoadingApproved(true);
     try {
-      // Pass no limit to get full list, or pass a number e.g., 20 if your API supports it
-      const data = await getApproved(type);
+      const data = await getApproved();
       setApproved(data || []);
     } catch (e) {
-      setErrApproved(e?.response?.data?.message || "Failed to load approved list");
+      setErrApproved(e.message || "Failed to load approved tutors");
     } finally {
       setLoadingApproved(false);
     }
@@ -56,36 +52,25 @@ export default function AdminApprovalsPage() {
   useEffect(() => {
     loadPending();
     loadApproved();
-  }, [type]);
+  }, []);
 
-  async function onDecision(email, action) {
-    if (!email) return alert("No email found for this item.");
-    if (actingEmail) return;
-    setActingEmail(email);
+  async function onDecision(id, action) {
+    if (!id) return alert("Tutor ID missing.");
+    if (actingId) return;
+    setActingId(id);
     try {
-      let reason;
+      let reason = "";
       if (action === "reject") {
-        reason = window.prompt("Optional: Provide a reason for rejection (or leave empty)", "");
+        reason = window.prompt("Provide a reason for rejection (optional):", "") || "";
       }
-      await decideByEmail({ type, email, action, reason });
-      //Update list locally
-      setItems((prev) =>
-        prev.filter((x) => (x.email || "").toLowerCase() !== (email || "").toLowerCase())
-      );
-      //if Approved, refresh and show in the approved list
-      if (action === "approve"){
-        try {
-          await loadApproved();
-        }catch {
-          //already updated the list
-        }
-      }
-
-      alert(`${action === "approve" ? "Approved" : "Rejected"}: ${email}`);
+      await decideTutor({ id, action, reason });
+      setItems((prev) => prev.filter((x) => x._id !== id));
+      await loadApproved();
+      alert(`${action === "approve" ? "Approved" : "Rejected"} successfully!`);
     } catch (e) {
-      alert(e?.response?.data?.message || "Action failed");
-    } finally{
-      setActingEmail(null);
+      alert(e.message || "Action failed");
+    } finally {
+      setActingId(null);
     }
   }
 
@@ -93,162 +78,152 @@ export default function AdminApprovalsPage() {
   const approvedEmpty = !loadingApproved && approved.length === 0;
 
   return (
-    <div className="admin-shell">
+    <div className="admin-layout">
       <AdminHeader />
       <AdminSidebar />
-
-      {/* Main content area */}
-      <main className="main">
-        <h1 className="page-title">Approvals</h1>
-        <p className="page-sub">
-          Approve or reject pending {type === "tutor" ? "tutor" : "institution"} accounts.
-        </p>
-
-        {/* Type Switch as buttons using existing .btn class */}
-        <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
-          <button
-            className="btn"
-            style={{
-              borderColor: type === "tutor" ? "var(--blue)" : "var(--line)",
-              color: type === "tutor" ? "var(--blue)" : "inherit",
-            }}
-            onClick={() => setType("tutor")}
-          >
-            Tutors
-          </button>
-          <button
-            className="btn"
-            style={{
-              borderColor: type === "institution" ? "var(--blue)" : "var(--line)",
-              color: type === "institution" ? "var(--blue)" : "inherit",
-            }}
-            onClick={() => setType("institution")}
-          >
-            Institutions
-          </button>
+      
+      <main className="admin-main-content">
+        <div className="content-header">
+          <div className="header-info">
+            <h1 className="page-title">Tutor Approvals</h1>
+            <p className="page-subtitle">
+              Review and manage pending tutor registrations.
+            </p>
+          </div>
+          <div className="header-stats">
+            <div className="stat-item">
+              <div className="stat-value">{items.length}</div>
+              <div className="stat-label">Pending</div>
+            </div>
+            <div className="stat-item">
+              <div className="stat-value">{approved.length}</div>
+              <div className="stat-label">Approved</div>
+            </div>
+          </div>
         </div>
 
-        {/* Error / loading / empty */}
-        {err && <div className="card" style={{ padding: 16, marginBottom: 16 }}>{err}</div>}
-        {loading && <div className="card" style={{ padding: 16, marginBottom: 16 }}>Loading…</div>}
-        {empty && !loading && (
-          <div className="card" style={{ padding: 16, marginBottom: 16 }}>
-            No pending {type}s 🎉
-          </div>
-        )}
-
-        {/* Table using your table classes */}
-        {!loading && items.length > 0 && (
-          <section className="table-wrap">
-            <div className="table-head">
-              <h3 className="card-title">
-                Pending {type === "tutor" ? "Tutors" : "Institutions"}
-              </h3>
-              <div className="table-controls" />
+        <div className="content-body">
+          {err && <div className="alert alert-error"><i className="bx bx-error-circle"></i><span>{err}</span></div>}
+          {loading && (
+            <div className="loading-card">
+              <i className="bx bx-loader-circle bx-spin"></i>
+              <span>Loading pending tutors…</span>
             </div>
+          )}
 
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Name / Email</th>
-                  <th>Status</th>
-                  <th>Applied</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {items.map((it, i) => (
-                  <tr key={(it._id || it.id || i).toString()}>
-                    <td>{i + 1}</td>
-                    <td>
-                      <div style={{ fontWeight: 600 }}>{niceName(it)}</div>
-                      <div style={{ color: "var(--muted)", fontSize: 12 }}>
-                        {it.email || "-"}
-                      </div>
-                    </td>
-                    <td>
-                      <span className={`status ${it.status || "pending"}`}>
-                        {(it.status || "pending").replace(/^\w/, (c) => c.toUpperCase())}
-                      </span>
-                    </td>
-                    <td>{niceDate(it.createdAt)}</td>
-                    <td>
-                      <div style={{ display: "flex", gap: 8 }}>
-                        <button
-                          className="btn btn-approve"
-                          onClick={() => onDecision(it.email, "approve")}
-                        >
-                          Approve
-                        </button>
-                        <button
-                          className="btn btn-reject"
-                          onClick={() => onDecision(it.email, "reject")}
-                        >
-                          Reject
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </section>   
-        )}
-
-        {/* Approved Section */}
-        {errApproved && <div className="card" style={{ padding: 16, marginBottom: 16 }}>{errApproved}</div>}
-        {loadingApproved && <div className="card" style={{ padding: 16, marginBottom: 16 }}>Loading approved…</div>}
-        {approvedEmpty && !loadingApproved && (
-          <div className="card" style={{ padding: 16, marginBottom: 16 }}>
-            No approved {type}s found.
-          </div>
-        )}
-
-        {!loadingApproved && approved.length > 0 && (
-          <section className="table-wrap">
-            <div className="table-head">
-              <h3 className="card-title">
-                Approved {type === "tutor" ? "Tutors" : "Institutions"}
-              </h3>
-              <div className="table-controls" />
+          {empty && !loading && (
+            <div className="empty-state-card">
+              <i className="bx bx-party"></i>
+              <h3>No pending tutors</h3>
+              <p>All caught up! 🎉</p>
             </div>
+          )}
 
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>ID</th>
-                  <th>Name / Email</th>
-                  <th>Status</th>
-                  <th>Approved On</th>
-                </tr>
-              </thead>
-              <tbody>
-                {approved.map((it, i) => (
-                  <tr key={(it._id || it.id || `a-${i}`).toString()}>
-                    <td>{i + 1}</td>
-                    <td style={{ fontFamily: "monospace" }}>{(it._id || it.id || "-").toString()}</td>
-                    <td>
-                      <div style={{ fontWeight: 600 }}>{niceName(it)}</div>
-                      <div style={{ color: "var(--muted)", fontSize: 12 }}>
-                        {it.email || "-"}
-                      </div>
-                    </td>
-                    <td>
-                      <span className={`status ${it.status || "active"}`}>
-                        {(it.status || "active").replace(/^\w/, (c) => c.toUpperCase())}
-                      </span>
-                    </td>
-                    <td>{niceDate(it.approvedAt)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            </section>
-        )}
+          {!loading && items.length > 0 && (
+            <div className="card">
+              <div className="card-header">
+                <h3 className="card-title">Pending Tutor Applications</h3>
+                <div className="card-actions">
+                  <button className="btn btn-secondary btn-sm" onClick={loadPending}>
+                    <i className="bx bx-refresh"></i> Refresh
+                  </button>
+                </div>
+              </div>
+
+              <div className="table-container">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Applied Date</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {items.map((it, i) => (
+                      <tr key={it._id} className={actingId === it._id ? "row-disabled" : ""}>
+                        <td>{i + 1}</td>
+                        <td>{niceName(it)}</td>
+                        <td>{it.email}</td>
+                        <td>{niceDate(it.createdAt)}</td>
+                        <td>
+                          <div className="action-buttons">
+                            <button
+                              className="btn btn-success btn-sm"
+                              onClick={() => onDecision(it._id, "approve")}
+                              disabled={actingId === it._id}
+                            >
+                              {actingId === it._id ? (
+                                <>
+                                  <i className="bx bx-loader-circle bx-spin"></i> Processing…
+                                </>
+                              ) : (
+                                <>
+                                  <i className="bx bx-check"></i> Approve
+                                </>
+                              )}
+                            </button>
+                            <button
+                              className="btn btn-danger btn-sm"
+                              onClick={() => onDecision(it._id, "reject")}
+                              disabled={actingId === it._id}
+                            >
+                              <i className="bx bx-x"></i> Reject
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {!loadingApproved && approved.length > 0 && (
+            <div className="card">
+              <div className="card-header">
+                <h3 className="card-title">Approved Tutors</h3>
+                <div className="card-actions">
+                  <button className="btn btn-secondary btn-sm" onClick={loadApproved}>
+                    <i className="bx bx-refresh"></i> Refresh
+                  </button>
+                </div>
+              </div>
+              <div className="table-container">
+                <table className="data-table">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Name</th>
+                      <th>Email</th>
+                      <th>Phone</th>
+                      <th>Subjects</th>
+                      <th>Grades</th>
+                      <th>Approved Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {approved.map((it, i) => (
+                      <tr key={it._id}>
+                        <td>{i + 1}</td>
+                        <td>{niceName(it)}</td>
+                        <td>{it.email}</td>
+                        <td>{it.details?.phoneNumber || "-"}</td>
+                        <td>{it.details?.subjects?.join(", ") || "-"}</td>
+                        <td>{it.details?.preferredGradeLevels?.join(", ") || "-"}</td>
+                        <td>{niceDate(it.approvedAt)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
       </main>
     </div>
-    
   );
 }

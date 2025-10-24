@@ -3,36 +3,10 @@ import crypto from "crypto";
 import nodemailer from "nodemailer";
 import User from "../../models/admin.models/User.model.js";
 import { comparePassword, signJWT, hashPassword } from "../../utils/admin.utils/admin.utils.js";
-import { log } from "console";
 
 /* -----------------------------
  * Config / helpers
  * --------------------------- */
-
-// Map external actions to stored statuses
-const STATUS_MAP = {
-  approve: "approved",
-  reject: "rejected",
-};
-
-// Safe ObjectId cast
-function oid(id) {
-  try {
-    return new mongoose.Types.ObjectId(id);
-  } catch {
-    return null;
-  }
-}
-
-// Staging collections
-function getCols() {
-  const db = mongoose.connection.db;
-  if (!db) throw new Error("DB not ready");
-  return {
-    tutors: db.collection("tutors_staging"),
-    institutions: db.collection("institutions_staging"),
-  };
-}
 
 // Normalize email
 function normEmail(email) {
@@ -65,12 +39,7 @@ const MAIL_FROM =
  */
 export async function loginAdmin({ email, password }) {
   const admin = await User.findOne({ email: normEmail(email) });
-
-  
   if (!admin) throw new Error("Admin not found");
-
-
-  
 
   if (admin.status !== "active") {
     throw new Error("Admin account is not active");
@@ -145,7 +114,13 @@ export async function signupAdmin({ name, email, password }) {
   if (exists) throw new Error("Email already in use");
 
   const passwordHash = await hashPassword(password);
-  const admin = await User.create({ name, email: em, passwordHash, role: "admin", status: "active" });
+  const admin = await User.create({
+    name,
+    email: em,
+    passwordHash,
+    role: "admin",
+    status: "active",
+  });
 
   return {
     id: admin._id,
@@ -191,6 +166,7 @@ export async function updateAdminById(id, { name, email }) {
     { new: true }
   );
   if (!admin) throw new Error("Admin not found");
+
   return {
     id: admin._id,
     name: admin.name,
@@ -216,79 +192,9 @@ export async function changeAdminPassword(id, { currentPassword, newPassword }) 
 }
 
 /* -----------------------------
- * Admin actions (approve/reject)
+ * Basic helper exports
  * --------------------------- */
-export async function changeStatus({ type, action, reason, id, email }) {
-  const { tutors, institutions } = getCols();
-  const status = STATUS_MAP[action];
-  if (!status) throw new Error("Invalid action");
 
-  if (!!id === !!email) throw new Error("Provide exactly one of: id OR email");
-
-  const col =
-    type === "tutor" ? tutors :
-    type === "institution" ? institutions :
-    null;
-  if (!col) throw new Error("Invalid type");
-
-  let filter;
-  if (id) {
-    const _id = oid(id);
-    filter = _id ? { $or: [{ _id }, { _id: id }] } : { _id: id };
-  } else {
-    filter = { email: new RegExp(`^${normEmail(email)}$`, "i") };
-  }
-
-  const now = new Date();
-  const set = { status, "meta.decisionReason": reason ?? null };
-  if (status === "approved") set.approvedAt = now;
-
-  const updateDoc = { $set: set };
-  if (status === "rejected") updateDoc.$unset = { approvedAt: "" };
-
-  const update = await col.updateOne(filter, updateDoc);
-  if (update.modifiedCount === 0) {
-    throw new Error(
-      id ? `${type} with id ${id} not found!` : `${type} with email ${email} not found`
-    );
-  }
-
-  return await col.findOne(filter);
-}
-
-/**
- * List pending
- */
-export async function listPending({ type }) {
-  const { tutors, institutions } = getCols();
-  if (type === "tutor") {
-    return tutors.find({ status: "pending" }).sort({ _id: -1 }).toArray();
-  }
-  if (type === "institution") {
-    return institutions.find({ status: "pending" }).sort({ _id: -1 }).toArray();
-  }
-  throw new Error("Invalid type");
-}
-
-/**
- * List approved
- */
-export async function listApproved({ type, limit = 5 }) {
-  const { tutors, institutions } = getCols();
-  const lim = Number(limit) || 5;
-
-  if (type === "tutor") {
-    return tutors.find({ status: "approved" }).sort({ approvedAt: -1, _id: -1 }).limit(lim).toArray();
-  }
-  if (type === "institution") {
-    return institutions.find({ status: "approved" }).sort({ approvedAt: -1, _id: -1 }).limit(lim).toArray();
-  }
-  throw new Error("Invalid type");
-}
-
-/* -----------------------------
- * Tiny aliases some controllers expect
- * --------------------------- */
 export async function getMe(id) {
   return getAdminById(id);
 }
