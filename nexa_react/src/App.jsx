@@ -4,6 +4,8 @@ import { Route, Routes } from "react-router-dom";
 import GlobalRoutes from "./routes/global.routes/global.routes";
 import RedirectToDefaultRoute from "./tools/global.tools.js/defaultRoot.tool";
 import DonorDashboard from "./components/donor.components/dashboard.components/donorDashboard.component.jsx";
+//admin
+import 'boxicons/css/boxicons.min.css';
 
 function App() {
   return (

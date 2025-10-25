@@ -1,36 +1,41 @@
 import BASE_URL from "../../tools/global.tools.js/baseUrl";
 
-// src/apis/admin.apis/admin.approvals.api.js
 const API = import.meta.env.VITE_API_HOST || "http://localhost:5000";
 const BASE = `${BASE_URL}/admin`;
 
-export async function getPending(type) {
-  const r = await fetch(`${BASE}/pending?type=${encodeURIComponent(type)}`, {
+/* -----------------------------
+ * Tutor Approval APIs (new backend)
+ * --------------------------- */
+
+/** Get all pending tutors */
+export async function getPending() {
+  const r = await fetch(`${BASE}/tutors/pending`, {
     credentials: "include",
   });
   const d = await r.json().catch(() => ({}));
   if (!r.ok) throw new Error(d?.message || `HTTP ${r.status}`);
-  return d.items || [];
+  return d.data || [];
 }
 
-export async function decideByEmail({ type, email, action, reason }) {
-  const r = await fetch(`${BASE}/decision/${encodeURIComponent(type)}`, {
+/** Get approved tutors */
+export async function getApproved(limit = 20) {
+  const r = await fetch(`${BASE}/tutors/approved?limit=${limit}`, {
+    credentials: "include",
+  });
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(d?.message || `HTTP ${r.status}`);
+  return d.data || [];
+}
+
+/** Approve or reject a tutor */
+export async function decideTutor({ id, action, reason }) {
+  const r = await fetch(`${BASE}/tutors/decision/${id}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
-    body: JSON.stringify({ email, action, reason }),
+    body: JSON.stringify({ action, reason }),
   });
   const d = await r.json().catch(() => ({}));
   if (!r.ok) throw new Error(d?.message || `HTTP ${r.status}`);
-  return d.item;
-}
-
-export async function getApproved(type, limit = 5) {
-  const r = await fetch(
-    `${BASE}/approved?type=${encodeURIComponent(type)}&limit=${limit}`,
-    { credentials: "include" }
-  );
-  const d = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error(d?.message || `HTTP ${r.status}`);
-  return d.items || [];
+  return d.data || null;
 }
