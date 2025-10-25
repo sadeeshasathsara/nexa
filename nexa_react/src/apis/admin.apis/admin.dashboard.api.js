@@ -1,18 +1,32 @@
 // src/apis/admin.apis/admin.dashboard.api.js
-const API = import.meta.env.VITE_API_HOST || "http://localhost:5000";
+import api from "./api.instance.js";
 
-export async function getStudentCount() {
-  const res = await fetch(`${API}/api/v1/admin/students/count`, {
-    method: "GET",
-    credentials: "include",
-  });
+/**
+ * 🔵 Get Active Students Count
+ * Backend route: GET /api/v1/admin/students/count
+ * Returns: { success: true, count: <number> }
+ */
+export const getStudentCount = async () => {
+  const { data } = await api.get("/admin/students/count");
+  return data?.count ?? 0;
+};
 
-  const data = await res.json().catch(() => ({}));
+/**
+ * 🟣 Get Course Categories for Subject Distribution Pie
+ * Backend route: GET /api/v1/admin/dashboard/course-categories
+ * Returns: { data: [{ name: "Programming", value: 5 }, ...] }
+ */
+export const getCourseCategories = async () => {
+  const { data } = await api.get("/admin/dashboard/course-categories");
+  return data?.data || [];
+};
 
-  if (!res.ok) {
-    throw new Error(data?.message || `HTTP ${res.status}`);
-  }
-
-  // ✅ Backend returns { success: true, count: 2 }
-  return data?.count || 0;
-}
+/**
+ * 🟢 Get Sessions Chart Data
+ * Backend route: GET /api/v1/admin/dashboard/sessions-chart
+ * Returns: { data: [{ name: "2025-10-23", sessions: 10, tutors: 6 }, ...] }
+ */
+export const getSessionsChart = async () => {
+  const { data } = await api.get("/admin/dashboard/sessions-chart");
+  return data?.data || [];
+};
