@@ -33,7 +33,7 @@ const TutorTopNav = () => {
 
   const handleClick = () => {
     // This forces a full page request and reload to the new URL.
-    window.location.href = "/v1/tutor";
+    window.location.href = "/v1/tutor/courses";
   };
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -60,7 +60,7 @@ const TutorTopNav = () => {
   }, []);
 
   const navItems = [
-    { name: "My Courses", icon: BookOpen, path: "courses" },
+    { name: "Dashboard", icon: BookOpen, path: "dashboard" },
     { name: "Schedule", icon: Calendar, path: "schedule" },
     { name: "Assignments", icon: ClipboardList, path: "assignments" },
     { name: "Students", icon: Users, path: "students" },
