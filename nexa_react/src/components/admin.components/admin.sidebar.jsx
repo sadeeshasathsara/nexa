@@ -70,6 +70,11 @@ export default function AdminSidebar() {
                 <span className="nav-text">Approvals</span>
               </NavLink>
 
+              <NavLink to="/v1/admin/usermanage" className={linkClass}>
+                <i className="bx bx-user-circle"></i>
+                <span className="nav-text">User Management</span>
+              </NavLink>
+
               <NavLink to="/v1/admin/settings" className={linkClass}>
                 <i className="bx bx-cog"></i>
                 <span className="nav-text">Settings</span>

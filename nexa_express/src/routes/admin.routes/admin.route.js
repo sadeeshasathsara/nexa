@@ -44,6 +44,11 @@ import {
 
 import { getCoursesChartController } from "../../controllers/admin.controllers/admin.dashboard.controller.js";
 
+import {
+  listUsersController,
+  toggleUserSuspensionController,
+} from "../../controllers/admin.controllers/admin.users.controller.js";
+
 const router = express.Router();
 
 // Router-level cookie parser
@@ -137,6 +142,13 @@ router.get("/analytics/donations/pdf",     adminSessionAuth, downloadDonationsPD
 router.get("/analytics/courses/pdf",       adminSessionAuth, downloadCoursesPDF);
 // ...inside the protected/admin router area (like other dashboard routes)
 router.get("/dashboard/courses-chart", /* adminSessionAuth, */ getCoursesChartController);
+
+/* -----------------------------
+ * User Management
+ * Base: /api/.../v1/admin/users
+ * --------------------------- */
+router.get("/users", /* adminSessionAuth, */ listUsersController);
+router.patch("/users/:id/suspend", /* adminSessionAuth, */ toggleUserSuspensionController);
 
 
 export default router;
