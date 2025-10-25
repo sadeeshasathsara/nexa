@@ -15,7 +15,6 @@ const donationSchema = new mongoose.Schema({
     required: [true, 'Institution is required']
   },
   
-  
   // Donation Details
   amount: {
     type: Number,
@@ -175,7 +174,4 @@ donationSchema.pre('save', function(next) {
 const Donation = mongoose.model('Donation', donationSchema);
 
 export default Donation;
-
-
-
 

@@ -268,5 +268,3 @@ For questions or issues:
 **Note**: This system is designed to be scalable and secure. Always follow security best practices when deploying to production.
 
 
-
-
