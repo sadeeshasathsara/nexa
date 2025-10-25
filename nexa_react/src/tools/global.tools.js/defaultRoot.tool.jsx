@@ -5,7 +5,7 @@ const RedirectToDefaultRoute = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        navigate('/v1');
+        navigate('/v1/donor');
     }, [])
 
     return (

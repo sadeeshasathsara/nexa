@@ -1,0 +1,28 @@
+@import "tailwindcss";
+
+/* Cross-browser typography and interaction defaults */
+@layer base {
+  html {
+    text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
+  }
+}
+
+/* Custom utility classes layered so Tailwind keeps them */
+@layer utilities {
+  .u-user-select-none {
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  .u-user-select-text {
+    user-select: text;
+    -webkit-user-select: text;
+  }
+
+  /* Utility for backdrop blur support (use on elements with background + blur) */
+  .u-backdrop-blur {
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+}

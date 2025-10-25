@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import RegisterDonor from '../../components/donor.components/register.components/registerDonor.component.jsx';
 import LoginDonor from '../../components/donor.components/login.components/loginDonor.component.jsx';
 import DonorDashboard from '../../components/donor.components/dashboard.components/donorDashboard.component.jsx';
+import TestComponent from '../../components/TestComponent.jsx';
+import SimpleDonorDashboard from '../../components/SimpleDonorDashboard.jsx';
 
 function DonorPage() {
     const [currentView, setCurrentView] = useState('dashboard'); // 'login', 'register', 'dashboard'

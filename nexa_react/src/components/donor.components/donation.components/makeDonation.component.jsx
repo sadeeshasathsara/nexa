@@ -1,5 +1,6 @@
-import { Heart, DollarSign, CreditCard, Building2, Target, Calendar } from 'lucide-react';
+import { Heart, DollarSign, CreditCard, Building2, Target, Calendar, Shield, CheckCircle } from 'lucide-react';
 import React, { useState } from 'react';
+import payHereService from '../../../utils/payhere-simple.utils.js';
 
 const MakeDonation = ({ onBack }) => {
   const [donationData, setDonationData] = useState({
@@ -12,6 +13,18 @@ const MakeDonation = ({ onBack }) => {
   });
 
   const [isProcessing, setIsProcessing] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('payhere');
+  const [donorInfo, setDonorInfo] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    address: {
+      street: '',
+      city: '',
+      country: 'Sri Lanka'
+    }
+  });
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -21,27 +34,66 @@ const MakeDonation = ({ onBack }) => {
     }));
   };
 
+  const handleDonorInfoChange = (e) => {
+    const { name, value } = e.target;
+    if (name.includes('.')) {
+      const [parent, child] = name.split('.');
+      setDonorInfo(prev => ({
+        ...prev,
+        [parent]: {
+          ...prev[parent],
+          [child]: value
+        }
+      }));
+    } else {
+      setDonorInfo(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsProcessing(true);
     
     try {
-      // Simulate donation processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      if (paymentMethod === 'payhere') {
+        // Validate required fields for PayHere
+        if (!donorInfo.firstName || !donorInfo.lastName || !donorInfo.email) {
+          alert('Please fill in your personal information for payment processing.');
+          setIsProcessing(false);
+          return;
+        }
+
+        // Submit payment to PayHere
+        const result = payHereService.submitPayment(donationData, donorInfo);
+        
+        if (result.success) {
+          // Payment form submitted successfully
+          alert('Redirecting to PayHere payment gateway. Please complete your payment there.');
+        } else {
+          alert(`Payment submission failed: ${result.message}`);
+        }
+      } else {
+        // Simulate other payment methods
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        alert('Donation successful! Thank you for your generosity.');
+      }
       
-      // Show success message
-      alert('Donation successful! Thank you for your generosity.');
-      
-      // Reset form
-      setDonationData({
-        amount: '',
-        currency: 'USD',
-        institution: '',
-        cause: '',
-        message: '',
-        anonymous: false
-      });
+      // Reset form only if not using PayHere (PayHere handles its own flow)
+      if (paymentMethod !== 'payhere') {
+        setDonationData({
+          amount: '',
+          currency: 'USD',
+          institution: '',
+          cause: '',
+          message: '',
+          anonymous: false
+        });
+      }
     } catch (error) {
+      console.error('Donation error:', error);
       alert('Donation failed. Please try again.');
     } finally {
       setIsProcessing(false);
@@ -75,6 +127,49 @@ const MakeDonation = ({ onBack }) => {
           <div className="lg:col-span-2">
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
               <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Payment Method Selection */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Payment Method
+                  </label>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod('payhere')}
+                      className={`p-4 border-2 rounded-lg transition-colors ${
+                        paymentMethod === 'payhere'
+                          ? 'border-blue-500 bg-blue-50 text-blue-700'
+                          : 'border-gray-300 hover:border-gray-400'
+                      }`}
+                    >
+                      <div className="flex items-center space-x-3">
+                        <Shield className="w-6 h-6" />
+                        <div className="text-left">
+                          <div className="font-medium">PayHere.lk</div>
+                          <div className="text-sm text-gray-600">Secure payment gateway</div>
+                        </div>
+                      </div>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod('other')}
+                      className={`p-4 border-2 rounded-lg transition-colors ${
+                        paymentMethod === 'other'
+                          ? 'border-blue-500 bg-blue-50 text-blue-700'
+                          : 'border-gray-300 hover:border-gray-400'
+                      }`}
+                    >
+                      <div className="flex items-center space-x-3">
+                        <CreditCard className="w-6 h-6" />
+                        <div className="text-left">
+                          <div className="font-medium">Other Methods</div>
+                          <div className="text-sm text-gray-600">Coming soon</div>
+                        </div>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+
                 {/* Amount Section */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -87,11 +182,10 @@ const MakeDonation = ({ onBack }) => {
                       onChange={handleInputChange}
                       className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     >
+                      <option value="LKR">LKR</option>
                       <option value="USD">USD</option>
                       <option value="EUR">EUR</option>
                       <option value="GBP">GBP</option>
-                      <option value="CAD">CAD</option>
-                      <option value="AUD">AUD</option>
                     </select>
                     <input
                       type="number"
@@ -167,6 +261,100 @@ const MakeDonation = ({ onBack }) => {
                   />
                 </div>
 
+                {/* Donor Information for PayHere */}
+                {paymentMethod === 'payhere' && (
+                  <div className="border-t pt-6">
+                    <h3 className="text-lg font-medium text-gray-900 mb-4 flex items-center">
+                      <CheckCircle className="w-5 h-5 mr-2 text-green-600" />
+                      Payment Information
+                    </h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          First Name *
+                        </label>
+                        <input
+                          type="text"
+                          name="firstName"
+                          value={donorInfo.firstName}
+                          onChange={handleDonorInfoChange}
+                          required
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Last Name *
+                        </label>
+                        <input
+                          type="text"
+                          name="lastName"
+                          value={donorInfo.lastName}
+                          onChange={handleDonorInfoChange}
+                          required
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Email Address *
+                        </label>
+                        <input
+                          type="email"
+                          name="email"
+                          value={donorInfo.email}
+                          onChange={handleDonorInfoChange}
+                          required
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Phone Number
+                        </label>
+                        <input
+                          type="tel"
+                          name="phone"
+                          value={donorInfo.phone}
+                          onChange={handleDonorInfoChange}
+                          placeholder="+94XXXXXXXXX"
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Street Address
+                        </label>
+                        <input
+                          type="text"
+                          name="address.street"
+                          value={donorInfo.address.street}
+                          onChange={handleDonorInfoChange}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          City
+                        </label>
+                        <input
+                          type="text"
+                          name="address.city"
+                          value={donorInfo.address.city}
+                          onChange={handleDonorInfoChange}
+                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                      </div>
+                    </div>
+                    <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+                      <p className="text-sm text-blue-800">
+                        <Shield className="inline w-4 h-4 mr-1" />
+                        Your payment information is securely processed by PayHere.lk. We do not store your payment details.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
                 {/* Anonymous Donation */}
                 <div className="flex items-center">
                   <input
@@ -193,12 +381,21 @@ const MakeDonation = ({ onBack }) => {
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                       </svg>
-                      Processing Donation...
+                      {paymentMethod === 'payhere' ? 'Redirecting to PayHere...' : 'Processing Donation...'}
                     </>
                   ) : (
                     <>
-                      <DollarSign className="w-5 h-5 mr-2" />
-                      Complete Donation
+                      {paymentMethod === 'payhere' ? (
+                        <>
+                          <Shield className="w-5 h-5 mr-2" />
+                          Pay with PayHere
+                        </>
+                      ) : (
+                        <>
+                          <DollarSign className="w-5 h-5 mr-2" />
+                          Complete Donation
+                        </>
+                      )}
                     </>
                   )}
                 </button>
@@ -232,6 +429,22 @@ const MakeDonation = ({ onBack }) => {
                 </div>
               </div>
             </div>
+
+            {/* PayHere Information */}
+            {paymentMethod === 'payhere' && (
+              <div className="bg-green-50 rounded-xl border border-green-200 p-6">
+                <h3 className="text-lg font-semibold text-green-900 mb-3 flex items-center">
+                  <Shield className="w-5 h-5 mr-2" />
+                  PayHere.lk Security
+                </h3>
+                <ul className="text-sm text-green-800 space-y-2">
+                  <li>• SSL encrypted payment processing</li>
+                  <li>• PCI DSS compliant security</li>
+                  <li>• Secure payment gateway</li>
+                  <li>• Multiple payment methods supported</li>
+                </ul>
+              </div>
+            )}
 
             {/* Quick Tips */}
             <div className="bg-blue-50 rounded-xl border border-blue-200 p-6">

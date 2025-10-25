@@ -21,6 +21,7 @@ import {
   validateForgotPassword,
   validateResetPassword
 } from '../../middlewares/donor.middlewares/validation.middleware.js';
+import payHereRoutes from './payhere.route.js';
 
 const router = express.Router();
 
@@ -40,6 +41,9 @@ router.post('/register', validateDonorRegistration, registerDonor);
 router.post('/login', validateDonorLogin, loginDonor);
 router.post('/forgot-password', validateForgotPassword, forgotPassword);
 router.put('/reset-password/:token', validateResetPassword, resetPassword);
+
+// PayHere payment routes (public - no authentication required for notifications)
+router.use('/payhere', payHereRoutes);
 
 // Protected routes
 router.use(protect); // Apply protection to all routes below

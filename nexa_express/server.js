@@ -2,6 +2,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import cors from 'cors';
 import APIRouterV1 from './src/routes/global.routes/global.route.js';
+import connectDB from './src/config/donor.config/database.config.js';
 
 dotenv.config();
 
@@ -19,6 +20,9 @@ app.get('/', (req, res) => {
 
 //API Route
 app.use('/api', APIRouterV1);
+
+// Connect to Database
+connectDB();
 
 app.listen(PORT, () => {
     console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);

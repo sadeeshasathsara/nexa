@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import MakeDonation from '../donation.components/makeDonation.component.jsx';
 import RecurringDonation from '../recurring.components/recurringDonation.component.jsx';
 import ViewImpact from '../impact.components/viewImpact.component.jsx';
+import PaymentResult from '../payment.components/paymentResult.component.jsx';
 
 const DonorDashboard = () => {
     const [currentView, setCurrentView] = useState('dashboard');
@@ -62,6 +63,19 @@ const DonorDashboard = () => {
     const handleNavigateToRecurring = () => setCurrentView('recurring');
     const handleNavigateToImpact = () => setCurrentView('impact');
     const handleBackToDashboard = () => setCurrentView('dashboard');
+
+    // Check for payment result in URL parameters
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const payment = urlParams.get('payment');
+        const action = urlParams.get('action');
+        
+        if (payment) {
+            setCurrentView('paymentResult');
+        } else if (action === 'donate') {
+            setCurrentView('makeDonation');
+        }
+    }, []);
 
     const renderOverview = () => (
         <div className="space-y-6">
@@ -359,6 +373,10 @@ const DonorDashboard = () => {
 
     if (currentView === 'impact') {
         return <ViewImpact onBack={handleBackToDashboard} />;
+    }
+
+    if (currentView === 'paymentResult') {
+        return <PaymentResult onBack={handleBackToDashboard} />;
     }
 
     // Main dashboard view
