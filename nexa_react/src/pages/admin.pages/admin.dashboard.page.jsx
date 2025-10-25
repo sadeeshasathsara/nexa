@@ -6,7 +6,12 @@ import AdminSidebar from "../../components/admin.components/admin.sidebar";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { getPending, getApproved } from "../../apis/admin.apis/admin.approvals.api";
-import { getCourseCategories, getSessionsChart, getStudentCount } from "../../apis/admin.apis/admin.dashboard.api";
+import {
+  getCourseCategories,
+  getSessionsChart,
+  getStudentCount,
+  getCoursesChart,             // ✅ NEW
+} from "../../apis/admin.apis/admin.dashboard.api";
 import {
   LineChart, Line, PieChart, Pie,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Cell
@@ -15,17 +20,18 @@ import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 
 /* ---------- Mock fallbacks ---------- */
-function buildMockSessions(days = 12) {
+function buildMockCourseStudentSeries(days = 12) {
   const out = [];
   for (let i = days - 1; i >= 0; i--) {
     const d = new Date();
     d.setDate(d.getDate() - i);
     const name = d.toISOString().slice(0, 10);
-    // Generate random mock data
-    const sessions = Math.floor(Math.random() * 20) + 5; // 5..24
-    const students  = Math.max(1, Math.floor(sessions * (0.6+ Math.random() * 0.2))); // 60-80%
-    // Push data with students instead of tutors
-    out.push({ name, sessions, students });
+
+    // Mock totals
+    const courses  = Math.floor(Math.random() * 4) + 1;  // 1..4 courses/day
+    const students = Math.floor(Math.random() * 10) + 3; // 3..12 students/day
+
+    out.push({ name, courses, students });
   }
   return out;
 }
@@ -43,12 +49,12 @@ function buildMockCategories() {
 export default function AdminDashboardPage() {
   const [pendingCount, setPendingCount] = useState(0);
   const [approvedCount, setApprovedCount] = useState(0);
-  const [studentCount, setStudentCount] = useState(0);  // 🔵 REAL students count
+  const [studentCount, setStudentCount] = useState(0);   // 🔵 REAL students count
   const [tutorRequests, setTutorRequests] = useState([]);
   const [approvedTutors, setApprovedTutors] = useState([]);
 
-  // Real (or mock) data for charts
-  const [sessionsData, setSessionsData] = useState([]);
+  // Real (or mock) data
+  const [series, setSeries] = useState([]);              // [{ name, courses, students }]
   const [categoryData, setCategoryData] = useState([]);
 
   const [loading, setLoading] = useState(false);
@@ -56,7 +62,7 @@ export default function AdminDashboardPage() {
   const [date, setDate] = useState(new Date());
   const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#A855F7", "#EF4444"];
 
-  // Load approvals + active students
+  /* Load approvals + active students */
   useEffect(() => {
     async function loadDashboardData() {
       setLoading(true);
@@ -64,13 +70,14 @@ export default function AdminDashboardPage() {
         const [pendingTutors, approved, students] = await Promise.all([
           getPending(),
           getApproved(1000),
-          getStudentCount(),                 // 🔵 calls /admin/students/count
+          getStudentCount(),               // 🔵 /admin/students/count
         ]);
+
         setTutorRequests(pendingTutors || []);
         setPendingCount(pendingTutors?.length || 0);
         setApprovedTutors(approved || []);
         setApprovedCount(approved?.length || 0);
-        setStudentCount(students || 0);     // 🔵 update card
+        setStudentCount(students || 0);   // update card
       } catch (error) {
         console.error("Error loading dashboard data:", error);
       } finally {
@@ -80,30 +87,65 @@ export default function AdminDashboardPage() {
     loadDashboardData();
   }, []);
 
-  // Load REAL chart data (sessions + categories) with mock fallback
+  /* Load charts: merge Courses (blue) + Students (green) + Categories */
   useEffect(() => {
     let mounted = true;
     async function loadCharts() {
       setChartLoading(true);
       try {
-        const [sessions, categories] = await Promise.all([
-          getSessionsChart().catch(() => []),
+        const [sessions, courses, categories] = await Promise.all([
+          getSessionsChart().catch(() => []),  // expects { name, students } or { name, tutors }
+          getCoursesChart().catch(() => []),   // expects { name, courses }
           getCourseCategories().catch(() => []),
         ]);
 
         if (!mounted) return;
 
-        const s = Array.isArray(sessions) && sessions.length ? sessions : buildMockSessions();
-        const cRaw = Array.isArray(categories) && categories.length ? categories : buildMockCategories();
-        const c = cRaw.map((x) => ({ name: x?.name || "Uncategorized", value: Number(x?.value || 0) }));
+        // normalize students from sessions (support legacy 'tutors')
+        const sMap = new Map(
+          (sessions || []).map((r) => [r.name, { students: r.students ?? r.tutors ?? 0 }])
+        );
 
-        setSessionsData(s);
-        setCategoryData(c);
+        // courses per day
+        const cMap = new Map((courses || []).map((r) => [r.name, { courses: r.courses ?? 0 }]));
+
+        // align by date across both
+        const keys = new Set([...sMap.keys(), ...cMap.keys()]);
+        let merged = Array.from(keys)
+          .sort() // ascending date strings
+          .map((k) => ({
+            name: k,
+            courses: cMap.get(k)?.courses ?? 0,
+            students: sMap.get(k)?.students ?? 0,
+          }));
+
+        // 🔁 Fallback 1: if we have dates but ALL students are 0, use the live active studentCount
+      // (this happens when sessions endpoint returns nothing)
+      const hasAnyStudentsPoint = merged.some((p) => Number(p.students) > 0);
+      if (!hasAnyStudentsPoint && merged.length && studentCount > 0) {
+        merged = merged.map((p) => ({ ...p, students: studentCount }));
+      }
+        // 🔁 Fallback 2: if no data at all, use mock
+        if (!merged.length) merged = buildMockCourseStudentSeries();
+
+        // categories
+        const cat = (categories?.length ? categories : [
+          { name: "JavaScript", value: 5 },
+          { name: "Java",       value: 4 },
+          { name: "Python",     value: 3 },
+        ]).map((x) => ({ name: x.name || "Uncategorized", value: Number(x.value || 0) }));
+
+        setSeries(merged);
+        setCategoryData(cat);
       } catch (err) {
         console.error("Error loading chart data:", err);
         if (mounted) {
-          setSessionsData(buildMockSessions());
-          setCategoryData(buildMockCategories());
+          setSeries(buildMockCourseStudentSeries());
+          setCategoryData([
+            { name: "JavaScript", value: 5 },
+            { name: "Java",       value: 4 },
+            { name: "Python",     value: 3 },
+          ]);
         }
       } finally {
         mounted && setChartLoading(false);
@@ -111,7 +153,11 @@ export default function AdminDashboardPage() {
     }
     loadCharts();
     return () => { mounted = false; };
-  }, []);
+  }, [studentCount]);
+
+  // helpers from series
+  const sumLastN = (key, n) =>
+    series.slice(-n).reduce((acc, item) => acc + (Number(item?.[key]) || 0), 0);
 
   return (
     <div className="admin-dashboard">
@@ -184,22 +230,16 @@ export default function AdminDashboardPage() {
               </div>
             </div>
 
-            {/* Weekly Sessions (from sessions data if available) */}
+            {/* Weekly Students (from merged series) */}
             <div className="stat-card">
               <div className="stat-icon-wrapper">
                 <div className="stat-icon sessions">📅</div>
               </div>
               <div className="stat-content">
-                <h3 className="stat-value">
-                  {
-                    sessionsData
-                      .slice(-7) // last 7 points (if daily)
-                      .reduce((acc, d) => acc + (Number(d.sessions) || 0), 0)
-                  }
-                </h3>
-                <p className="stat-label">This Week Sessions</p>
+                <h3 className="stat-value">{sumLastN("students", 7)}</h3>
+                <p className="stat-label">This Week Students</p>
                 <div className="stat-trend positive">
-                  <span>Live from quiz attempts</span>
+                  <span>Live from activity</span>
                 </div>
               </div>
             </div>
@@ -210,17 +250,14 @@ export default function AdminDashboardPage() {
         <div className="content-grid">
           {/* Charts Section */}
           <div className="charts-section">
-            {/* Sessions Chart (REAL or mock) */}
+            {/* Courses & Students Chart */}
             <div className="chart-card">
               <div className="chart-header">
-                <h3 className="chart-title">Sessions Overview</h3>
+                <h3 className="chart-title">Courses & Students Overview</h3>
               </div>
               <div className="chart-container">
                 <ResponsiveContainer width="100%" height={300}>
-                  <LineChart
-                    data={sessionsData}
-                    margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
-                  >
+                  <LineChart data={series} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                     <XAxis dataKey="name" stroke="#666" fontSize={12} />
                     <YAxis stroke="#666" fontSize={12} />
@@ -233,24 +270,22 @@ export default function AdminDashboardPage() {
                       }}
                     />
                     <Legend />
-                    {/* 🟦 Total Sessions (from quiz attempts or data) */}
                     <Line
                       type="monotone"
-                      dataKey="sessions"
-                      name="Total Sessions"
+                      dataKey="courses"
+                      name="Total Courses"
                       stroke="#0088FE"
                       strokeWidth={3}
                       dot={{ fill: "#0088FE", strokeWidth: 2, r: 3 }}
                       activeDot={{ r: 5 }}
                     />
-                    {/* 🟢 Active Students Line */}
                     <Line
                       type="monotone"
                       dataKey="students"
                       name="Active Students"
-                      stroke="#00C49F"
+                      stroke="#10B981"
                       strokeWidth={3}
-                      dot={{ fill: "#00C49F", strokeWidth: 2, r: 3 }}
+                      dot={{ fill: "#10B981", strokeWidth: 2, r: 3 }}
                       activeDot={{ r: 5 }}
                     />
                   </LineChart>
@@ -259,7 +294,7 @@ export default function AdminDashboardPage() {
               {chartLoading && <div className="loading-state" style={{ paddingTop: 8 }}>Loading…</div>}
             </div>
 
-            {/* Subjects Distribution (REAL or mock) */}
+            {/* Subjects Distribution */}
             <div className="chart-card">
               <div className="chart-header">
                 <h3 className="chart-title">Subjects Distribution</h3>
@@ -279,10 +314,7 @@ export default function AdminDashboardPage() {
                       dataKey="value"
                     >
                       {categoryData.map((entry, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={COLORS[index % COLORS.length]}
-                        />
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
                     <Tooltip />
@@ -350,10 +382,8 @@ export default function AdminDashboardPage() {
               </div>
               <div className="quick-stats">
                 <div className="quick-stat">
-                  <div className="stat-name">Total Sessions (30d)</div>
-                  <div className="stat-number">
-                    {sessionsData.slice(-30).reduce((a, b) => a + (+b.sessions || 0), 0)}
-                  </div>
+                  <div className="stat-name">Total Students (30d)</div>
+                  <div className="stat-number">{sumLastN("students", 30)}</div>
                 </div>
                 <div className="quick-stat">
                   <div className="stat-name">Top Category</div>

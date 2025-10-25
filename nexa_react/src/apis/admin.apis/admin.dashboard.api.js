@@ -30,3 +30,9 @@ export const getSessionsChart = async () => {
   const { data } = await api.get("/admin/dashboard/sessions-chart");
   return data?.data || [];
 };
+
+/** Courses time-series */
+export const getCoursesChart = async () => {
+  const { data } = await api.get("/admin/dashboard/courses-chart");
+  return data?.data || [];
+};

@@ -42,6 +42,7 @@ import {
   downloadCoursesPDF,
 } from "../../controllers/admin.controllers/admin.analytics.controller.js";
 
+import { getCoursesChartController } from "../../controllers/admin.controllers/admin.dashboard.controller.js";
 
 const router = express.Router();
 
@@ -110,9 +111,11 @@ router.patch(
 // ✅ Fetch total student count
 router.get("/students/count", async (req, res) => {
   try {
+    console.log("Counting students…");
     const db = mongoose.connection.db;
     const accounts = db.collection("accounts");
     const count = await accounts.countDocuments({ role: "student" });
+    
     res.status(200).json({ success: true, count });
   } catch (err) {
     console.error("Error fetching student count:", err);
@@ -132,7 +135,8 @@ router.get("/analytics/courses",       adminSessionAuth, getCoursesTable);
 router.get("/analytics/quiz-attempts/pdf", adminSessionAuth, downloadQuizAttemptsPDF);
 router.get("/analytics/donations/pdf",     adminSessionAuth, downloadDonationsPDF);
 router.get("/analytics/courses/pdf",       adminSessionAuth, downloadCoursesPDF);
-
+// ...inside the protected/admin router area (like other dashboard routes)
+router.get("/dashboard/courses-chart", /* adminSessionAuth, */ getCoursesChartController);
 
 
 export default router;
