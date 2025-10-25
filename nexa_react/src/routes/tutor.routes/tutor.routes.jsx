@@ -3,8 +3,7 @@ import { Route, Routes } from "react-router-dom";
 import TutorPage from "../../pages/tutor.pages/tutor.page";
 import TutorProfile from "../../pages/tutor.pages/tutor.profile.page";
 import TutorDashboard from "../../components/tutor.components/dashboard.components/TutorDashboard";
-import SessionScheduling from "../../pages/tutor.pages/tutor.session.sheduling";
-import MyCourses from "../../pages/tutor.pages/tutor.mycourses";
+import TutorChat from "../../pages/tutor.pages/tutor.chat.page";
 
 function TutorRoutes() {
   return (
@@ -13,7 +12,7 @@ function TutorRoutes() {
       <Route path="/" element={<TutorPage />}>
         <Route index path="dashboard" element={<TutorDashboard />} />
         {/* <Route  element={<MyCourses />} /> */}
-        <Route path="schedule" element={<SessionScheduling />} />
+        <Route path="schedule" element={<TutorChat />} />
         <Route path="assignments" element={<div>Assignments Page</div>} />
         <Route path="students" element={<div>Students Page</div>} />
         <Route path="analytics" element={<div>Analytics Page</div>} />

@@ -19,6 +19,12 @@ const CourseCard = ({ course, onSelect, onEdit, onDelete }) => {
     onDelete();
   };
 
+  const getRandomStudents = (min = 2, max = 6) => {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  };
+
+  const enrolledStudents = getRandomStudents();
+
   return (
     <div
       onClick={onSelect}
@@ -69,7 +75,7 @@ const CourseCard = ({ course, onSelect, onEdit, onDelete }) => {
           <div className="flex items-center gap-2 text-gray-700">
             <Users className="w-4 h-4 text-green-600" />
             <span className="text-sm font-medium">
-              {course.enrolledStudents} Students
+              {enrolledStudents} Students
             </span>
           </div>
         </div>

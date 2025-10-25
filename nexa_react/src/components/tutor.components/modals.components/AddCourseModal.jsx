@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { X, Upload } from "lucide-react";
-
 const AddCourseModal = ({ isOpen, onClose, onSubmit }) => {
   const [formData, setFormData] = useState({
     title: "",

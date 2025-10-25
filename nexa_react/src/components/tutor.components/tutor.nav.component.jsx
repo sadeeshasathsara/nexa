@@ -61,8 +61,7 @@ const TutorTopNav = () => {
 
   const navItems = [
     { name: "Dashboard", icon: BookOpen, path: "dashboard" },
-    { name: "Schedule", icon: Calendar, path: "schedule" },
-    { name: "Assignments", icon: ClipboardList, path: "assignments" },
+    { name: "My Chat", icon: Calendar, path: "schedule" },
     { name: "Students", icon: Users, path: "students" },
     { name: "Analytics", icon: BarChart3, path: "analytics" },
   ];
