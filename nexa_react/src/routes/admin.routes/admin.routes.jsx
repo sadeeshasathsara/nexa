@@ -8,6 +8,7 @@ import AdminApprovalsPage from "../../pages/admin.pages/admin.approvals.page.jsx
 import Notifications from "../../pages/admin.pages/admin.Notifications.jsx";
 import Messages from "../../pages/admin.pages/admin.Messages.jsx";
 import AdminAnalytics from "../../pages/admin.pages/AdminAnalytics.jsx";
+import AdminUserManagePage from "../../pages/admin.pages/admin.usermanage.page.jsx";
 
 
 export default function AdminRoutes() {
@@ -24,6 +25,7 @@ export default function AdminRoutes() {
         <Route path="notifications" element={<Notifications/>} />
         <Route path="messages" element={<Messages/>} />
         <Route path="analytics" element={<AdminAnalytics/>} />  
+        <Route path="usermanage" element={<AdminUserManagePage/>} />
       </Route>
     </Routes>
   );
