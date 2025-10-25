@@ -24,7 +24,7 @@ const TutorChat = () => {
   const [chats, setChats] = useState([]);
   const [messages, setMessages] = useState([]);
 
-  const [loadingCourses, setLoadingCourses] = useState(false);
+  const [loadingCourses, setLoadingCourses] = useState(true);
   const [loadingChats, setLoadingChats] = useState(false);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [sendingMessage, setSendingMessage] = useState(false);
@@ -61,7 +61,7 @@ const TutorChat = () => {
     },
   ];
 
-  // Mock chats data for each course with Sri Lankan student names
+  // Mock chats data for each course with Sri Lankan student names (online status removed)
   const mockChatsData = {
     "68fc9a59b4bce89b50a83e1e": [
       // Digital Marketing Course
@@ -73,7 +73,6 @@ const TutorChat = () => {
         lastMessage: "Thank you sir! I understand SEO strategies now",
         time: new Date(Date.now() - 10 * 60000),
         unreadCount: 2,
-        online: true,
       },
       {
         id: "s2",
@@ -83,7 +82,6 @@ const TutorChat = () => {
         lastMessage: "Can we discuss social media marketing?",
         time: new Date(Date.now() - 2 * 3600000),
         unreadCount: 1,
-        online: false,
       },
     ],
     "68fc9a9ab4bce89b50a83e3b": [
@@ -96,7 +94,6 @@ const TutorChat = () => {
         lastMessage: "Sir, I submitted the campaign analysis",
         time: new Date(Date.now() - 5 * 3600000),
         unreadCount: 0,
-        online: true,
       },
       {
         id: "s4",
@@ -106,7 +103,6 @@ const TutorChat = () => {
         lastMessage: "The design prototype is ready sir",
         time: new Date(Date.now() - 30 * 60000),
         unreadCount: 1,
-        online: true,
       },
       {
         id: "s5",
@@ -116,7 +112,6 @@ const TutorChat = () => {
         lastMessage: "Thank you for the design feedback!",
         time: new Date(Date.now() - 3 * 3600000),
         unreadCount: 0,
-        online: true,
       },
       {
         id: "s6",
@@ -126,7 +121,6 @@ const TutorChat = () => {
         lastMessage: "Sir, about the color theory assignment...",
         time: new Date(Date.now() - 12 * 3600000),
         unreadCount: 0,
-        online: false,
       },
     ],
     "68fc9ae3b4bce89b50a83e3d": [
@@ -139,7 +133,6 @@ const TutorChat = () => {
         lastMessage: "The presentation went perfectly!",
         time: new Date(Date.now() - 20 * 60000),
         unreadCount: 0,
-        online: true,
       },
     ],
   };
@@ -278,23 +271,37 @@ const TutorChat = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  // Load initial data
+  // Load initial data with simulated delay
   useEffect(() => {
-    setCourses(mockCourses);
+    const timer = setTimeout(() => {
+      setCourses(mockCourses);
+      setLoadingCourses(false);
+    }, 800);
+    return () => clearTimeout(timer);
   }, []);
 
   // Fetch chats when course is selected
   useEffect(() => {
     if (selectedCourse) {
-      setChats(mockChatsData[selectedCourse.id] || []);
+      setLoadingChats(true);
+      const timer = setTimeout(() => {
+        setChats(mockChatsData[selectedCourse.id] || []);
+        setLoadingChats(false);
+      }, 600);
+      return () => clearTimeout(timer);
     }
   }, [selectedCourse]);
 
   // Fetch messages when chat is selected
   useEffect(() => {
     if (selectedChat) {
-      setMessages(mockMessagesData[selectedChat.id] || []);
-      scrollToBottom();
+      setLoadingMessages(true);
+      const timer = setTimeout(() => {
+        setMessages(mockMessagesData[selectedChat.id] || []);
+        setLoadingMessages(false);
+        scrollToBottom();
+      }, 500);
+      return () => clearTimeout(timer);
     }
   }, [selectedChat]);
 
@@ -401,6 +408,13 @@ const TutorChat = () => {
     return colors[index % colors.length];
   };
 
+  // Loading Spinner Component
+  const LoadingSpinner = () => (
+    <div className="flex items-center justify-center h-full">
+      <div className="w-12 h-12 border-4 border-gray-200 border-t-blue-600 rounded-full animate-spin"></div>
+    </div>
+  );
+
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Courses Sidebar */}
@@ -430,38 +444,47 @@ const TutorChat = () => {
         </div>
 
         <div className="flex-1 overflow-y-auto">
-          {filteredCourses.map((course, index) => (
-            <div
-              key={course.id}
-              onClick={() => handleCourseSelect(course)}
-              className={`p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors ${
-                selectedCourse?.id === course.id ? "bg-blue-50" : ""
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <div
-                  className={`${getCourseColor(
-                    index
-                  )} w-12 h-12 rounded-lg flex items-center justify-center text-white font-semibold`}
-                >
-                  {course.name.charAt(0)}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-gray-800 truncate">
-                    {course.name}
-                  </h3>
-                  <p className="text-sm text-gray-500">
-                    {course.enrolledStudentsCount} students
-                  </p>
-                </div>
-                {course.unreadCount > 0 && (
-                  <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-                    {course.unreadCount}
-                  </div>
-                )}
-              </div>
+          {loadingCourses ? (
+            <LoadingSpinner />
+          ) : filteredCourses.length === 0 ? (
+            <div className="flex flex-col items-center justify-center p-8 text-center">
+              <BookOpen className="text-gray-400 mb-2" size={40} />
+              <p className="text-gray-600">No courses found</p>
             </div>
-          ))}
+          ) : (
+            filteredCourses.map((course, index) => (
+              <div
+                key={course.id}
+                onClick={() => handleCourseSelect(course)}
+                className={`p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors ${
+                  selectedCourse?.id === course.id ? "bg-blue-50" : ""
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`${getCourseColor(
+                      index
+                    )} w-12 h-12 rounded-lg flex items-center justify-center text-white font-semibold`}
+                  >
+                    {course.name.charAt(0)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-gray-800 truncate">
+                      {course.name}
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      {course.enrolledStudentsCount} students
+                    </p>
+                  </div>
+                  {course.unreadCount > 0 && (
+                    <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                      {course.unreadCount}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 
@@ -502,46 +525,52 @@ const TutorChat = () => {
             </div>
 
             <div className="flex-1 overflow-y-auto">
-              {chats.map((chat) => (
-                <div
-                  key={chat.id}
-                  onClick={() => handleChatSelect(chat)}
-                  className={`p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors ${
-                    selectedChat?.id === chat.id ? "bg-blue-50" : ""
-                  }`}
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="relative flex-shrink-0">
-                      <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
-                        {chat.avatar}
+              {loadingChats ? (
+                <LoadingSpinner />
+              ) : chats.length === 0 ? (
+                <div className="flex flex-col items-center justify-center p-8 text-center h-full">
+                  <Send className="text-gray-400 mb-2" size={40} />
+                  <p className="text-gray-600">No students in this course</p>
+                </div>
+              ) : (
+                chats.map((chat) => (
+                  <div
+                    key={chat.id}
+                    onClick={() => handleChatSelect(chat)}
+                    className={`p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors ${
+                      selectedChat?.id === chat.id ? "bg-blue-50" : ""
+                    }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0">
+                        <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
+                          {chat.avatar}
+                        </div>
                       </div>
-                      {chat.online && (
-                        <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex justify-between items-start mb-1">
-                        <h3 className="font-semibold text-gray-800 truncate">
-                          {chat.name}
-                        </h3>
-                        <span className="text-xs text-gray-500 whitespace-nowrap ml-2">
-                          {formatTime(chat.time)}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <p className="text-sm text-gray-600 truncate">
-                          {chat.lastMessage}
-                        </p>
-                        {chat.unreadCount > 0 && (
-                          <div className="w-5 h-5 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold ml-2 flex-shrink-0">
-                            {chat.unreadCount}
-                          </div>
-                        )}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex justify-between items-start mb-1">
+                          <h3 className="font-semibold text-gray-800 truncate">
+                            {chat.name}
+                          </h3>
+                          <span className="text-xs text-gray-500 whitespace-nowrap ml-2">
+                            {formatTime(chat.time)}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <p className="text-sm text-gray-600 truncate">
+                            {chat.lastMessage}
+                          </p>
+                          {chat.unreadCount > 0 && (
+                            <div className="w-5 h-5 bg-blue-600 rounded-full flex items-center justify-center text-white text-xs font-bold ml-2 flex-shrink-0">
+                              {chat.unreadCount}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
           </>
         ) : (
@@ -572,21 +601,15 @@ const TutorChat = () => {
                   >
                     <ArrowLeft size={20} />
                   </button>
-                  <div className="relative">
+                  <div className="flex-shrink-0">
                     <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center text-white font-semibold">
                       {selectedChat.avatar}
                     </div>
-                    {selectedChat.online && (
-                      <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
-                    )}
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-800">
                       {selectedChat.name}
                     </h3>
-                    <p className="text-xs text-gray-500">
-                      {selectedChat.online ? "Online" : "Offline"}
-                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3">
@@ -605,7 +628,9 @@ const TutorChat = () => {
 
             {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4">
-              {messages.length === 0 ? (
+              {loadingMessages ? (
+                <LoadingSpinner />
+              ) : messages.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-center">
                   <Send className="text-gray-400 mb-2" size={48} />
                   <p className="text-gray-600">No messages yet</p>

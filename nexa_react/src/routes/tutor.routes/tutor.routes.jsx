@@ -4,6 +4,7 @@ import TutorPage from "../../pages/tutor.pages/tutor.page";
 import TutorProfile from "../../pages/tutor.pages/tutor.profile.page";
 import TutorDashboard from "../../components/tutor.components/dashboard.components/TutorDashboard";
 import TutorChat from "../../pages/tutor.pages/tutor.chat.page";
+import TutorAnalytics from "../../pages/tutor.pages/tutor.analytics";
 
 function TutorRoutes() {
   return (
@@ -15,7 +16,7 @@ function TutorRoutes() {
         <Route path="schedule" element={<TutorChat />} />
         <Route path="assignments" element={<div>Assignments Page</div>} />
         <Route path="students" element={<div>Students Page</div>} />
-        <Route path="analytics" element={<div>Analytics Page</div>} />
+        <Route path="analytics" element={<TutorAnalytics />} />
         <Route path="profile" element={<TutorProfile />} />
         <Route path="settings" element={<div>Settings Page</div>} />
         <Route path="earnings" element={<div>Settings Page</div>} />
