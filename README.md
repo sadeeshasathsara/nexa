@@ -1,11 +1,13 @@
 # Nexa - Educational Platform Connecting Students with Tutors
 
+
+<img width="1898" height="1008" alt="image" src="https://github.com/user-attachments/assets/7623105b-2074-4215-b0ba-0dab8f6a2b5c" />
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
 [![React](https://img.shields.io/badge/React-19.1-blue.svg)](https://reactjs.org/)
 [![Express](https://img.shields.io/badge/Express-5.1-lightgrey.svg)](https://expressjs.com/)
 
-<img width="1898" height="1008" alt="image" src="https://github.com/user-attachments/assets/7623105b-2074-4215-b0ba-0dab8f6a2b5c" />
 
 
 **Nexa** is a comprehensive educational platform designed to connect underprivileged students with volunteer tutors, institutions, and donors. The platform facilitates educational content delivery, course management, and community engagement to bridge educational gaps.
